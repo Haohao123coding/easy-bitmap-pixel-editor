@@ -4,7 +4,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/Haohao123coding/easy-bitmap-pixel-editor.svg)
 ![GitHub issues](https://img.shields.io/github/issues/Haohao123coding/easy-bitmap-pixel-editor.svg)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/Haohao123coding/easy-bitmap-pixel-editor.svg)
-![Version](https://img.shields.io/badge/Version-0.0.0-808080)
+![Version](https://img.shields.io/badge/Version-1.0.0--Alpha.1-80a0c0)
 
 # EBPE - Easy Bitmap Pixel Editor
 
