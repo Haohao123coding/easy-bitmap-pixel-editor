@@ -144,12 +144,25 @@ namespace bmpOpr{
 		curFileName = fileName;
 		saveBMP();
 	}
+	void editPixel(int32_t x, int32_t y, color c){
+		// x, y is from zero
+		curFile.bmap[x][y] = c;
+	}
+	void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
+		// X first; X last; Y first; Y last
+		// x, y is from zero
+		for(int i = xf; i <= xl; i++){
+			for(int j = yf; j <= yl; j++){
+				editPixel(i, j, c);
+			}
+		}
+	}
 }
 
 int main(){
-	int wid, het, pr, pg, pb;
-	string bmpName;
-	cin >> wid >> het >> pr >> pg >> pb >> bmpName;
-	bmpOpr::genBMP(wid, het, color(pr, pg, pb), bmpName);
+	bmpOpr::genBMP(10, 10, color(0, 128, 255), "haha.bmp");
+	bmpOpr::editPixel(2, 2, color(255, 64, 0));
+	bmpOpr::drawRect(5, 5, 8, 7, color(64, 255, 32));
+	bmpOpr::saveBMP();
     return 0;
 }
