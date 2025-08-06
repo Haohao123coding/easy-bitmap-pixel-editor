@@ -164,5 +164,5 @@ int main(){
 	bmpOpr::editPixel(2, 2, color(255, 64, 0));
 	bmpOpr::drawRect(5, 5, 8, 7, color(64, 255, 32));
 	bmpOpr::saveBMP();
-    return 0;
+	return 0;
 }
