@@ -7,10 +7,12 @@
 
 # EBPE - Easy Bitmap Pixel Editor
 
-本项目正在开发中，敬请期待。This project is devoloping, wait for it!
-
 EBPE 是一个极其轻量化的位图编辑软件，在窗口中输入命令来操作图片。
 
-Note: English traslate maybe not 100% accurate.
+## 为什么有 EBPE？
 
-EBPE is an extremely lightweight bitmap editor that lets you manipulate images by entering commands directly in the terminal.
+使用 Windows 自带的图片编辑器编辑像素会有很多不便，而一个轻量化的编辑软件则非常适合。
+
+## 实现方式
+
+使用 C++ 语言。
