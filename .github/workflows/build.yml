@@ -1,0 +1,111 @@
+name: Build and Release EBPE - Multi-Platform
+
+on:
+  push:
+    tags:
+      - 'v*' # 推送以 'v' 开头的标签时触发
+
+jobs:
+  build-multi-platform:
+    runs-on: ${{ matrix.os }} # 使用矩阵中定义的操作系统
+    strategy:
+      matrix:
+        include:
+          # Ubuntu 配置
+          - os: ubuntu-latest
+            asset_name: ebpe-linux
+            compile_command: g++ ebpe.cpp -o ebpe -O2 -std=c++14 -static
+            artifact_path: ./ebpe
+          
+          # Windows 配置 (使用 MinGW-w64 的 g++)
+          - os: windows-latest
+            asset_name: ebpe-windows.exe
+            compile_command: g++ ebpe.cpp -o ebpe.exe -O2 -std=c++14 -static
+            artifact_path: ./ebpe.exe
+
+    steps:
+      # 步骤 1: 获取代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 步骤 2: 安装依赖 (针对不同系统)
+      - name: Install dependencies
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y g++ build-essential libstdc++-static
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            # 在 Windows 上安装 MinGW-w64
+            choco install mingw -y
+          fi
+
+      # 步骤 3: 设置 Windows 环境变量 (仅限 Windows)
+      - name: Setup Windows PATH
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
+
+      # 步骤 4: 编译项目
+      - name: Compile EBPE
+        run: ${{ matrix.compile_command }}
+
+      # 步骤 5: 列出生成的文件 (用于调试)
+      - name: List artifacts
+        run: ls -la
+
+      # 步骤 6: 上传编译产物作为工作流制品
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.artifact_path }}
+
+  # 创建 Release 并上传所有制品
+  create-release:
+    needs: build-multi-platform # 等待所有编译任务完成
+    runs-on: ubuntu-latest
+    steps:
+      # 步骤 1: 下载所有平台编译好的制品
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      # 步骤 2: 查看下载的制品结构
+      - name: List downloaded artifacts
+        run: |
+          find ./artifacts -type f
+          ls -R ./artifacts
+
+      # 步骤 3: 创建 GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      # 步骤 4: 上传所有二进制文件到 Release
+      - name: Upload Linux binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/ebpe-linux/ebpe
+          asset_name: ebpe-linux
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/ebpe-windows.exe/ebpe.exe
+          asset_name: ebpe-windows.exe
+          asset_content_type: application/octet-stream
