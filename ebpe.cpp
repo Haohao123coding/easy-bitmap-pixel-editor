@@ -249,7 +249,6 @@ namespace cmdOpr{
 		}
 	}
 	int hex_2_to_dec(string hex){
-		cout << hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]) << ' ';
 		return hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]);
 	}
 	color analyseColor(string str){
@@ -395,7 +394,6 @@ namespace cmdOpr{
 }
 
 int main(){
-//	bmpOpr::genBMP(128, 128, color(0, 255, 255), "a.bmp");
 	while(true){
 		cmdOpr::loopTime();
 	}
