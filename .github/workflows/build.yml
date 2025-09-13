@@ -41,7 +41,7 @@ jobs:
           
           if [ "$RUNNER_OS" = "Linux" ]; then
             sudo apt update
-            sudo apt install -y g++ build-essential libc6-dev libstdc++-12-dev
+            sudo apt install -y g++
           elif [ "$RUNNER_OS" = "Windows" ]; then
             choco install mingw -y
             echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
