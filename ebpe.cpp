@@ -387,6 +387,13 @@ namespace cmdOpr{
 					bmpOpr::drawRect(xf, yf, xl, yl, color_set);
 				}
 			}
+		}else if(cmds[0] == "exit"){
+			if(wordCount != 1){
+				cerr << "Wrong Format!" << endl;
+			}else{
+				bmpOpr::saveBMP();
+				exit(0);
+			}
 		}else{
 			cerr << "Unknown Command!" << endl;
 		}
