@@ -80,6 +80,7 @@ namespace bmpOpr{
 	    file.read(reinterpret_cast<char*>(&curFile.fileh), sizeof(fileHeader));
     	file.read(reinterpret_cast<char*>(&curFile.infoh), sizeof(infoHeader));
     	
+    	
     	// check
     	if(curFile.fileh.bfType != 0x4D42){
 			cerr << "Not BMP file!" << endl;
@@ -111,6 +112,12 @@ namespace bmpOpr{
     	int colorByte = curFile.infoh.biBitCount / 8;
     	int rowSize = (width * colorByte + 3) / 4 * 4;
     	int paddingSize = rowSize - width * colorByte;
+    	
+    	// setup vectors
+    	curFile.bmap.resize(height);
+    	for(int i = 0; i < height; i++){
+			curFile.bmap[i].resize(width);
+		}
     	
     	// read pixels
     	for(int i = height - 1; i >= 0; i--){
@@ -166,6 +173,12 @@ namespace bmpOpr{
 		// write headers
 		file.write(reinterpret_cast<const char*>(&curFile.fileh), sizeof(fileHeader));
     	file.write(reinterpret_cast<const char*>(&curFile.infoh), sizeof(infoHeader));
+    	
+    	// setup vectors
+    	curFile.bmap.resize(height);
+    	for(int i = 0; i < height; i++){
+			curFile.bmap[i].resize(width);
+		}
     	
     	// write pixels
     	for(int i = height - 1; i >= 0; i--){
@@ -224,7 +237,22 @@ namespace bmpOpr{
 }
 
 namespace cmdOpr{
-	color analyse_color(string str){
+	int hex_to_dec(char hex){
+		if(hex >= '0' && hex <= '9'){
+			return hex - '0';
+		}else if(hex >= 'A' && hex <= 'F'){
+			return hex - 'A' + 10;
+		}else if(hex >= 'a' && hex <= 'f'){
+			return hex - 'a' + 10;
+		}else{
+			return 0;
+		}
+	}
+	int hex_2_to_dec(string hex){
+		cout << hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]) << ' ';
+		return hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]);
+	}
+	color analyseColor(string str){
 		int colorByte;
 		if(curFile.infoh.biBitCount == 24){
 			colorByte = 3;
@@ -243,11 +271,11 @@ namespace cmdOpr{
 				return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
 			}
 		}
-		int r = stoi(str.substr(0, 2), nullptr, 16);
-        int g = stoi(str.substr(2, 2), nullptr, 16);
-        int b = stoi(str.substr(4, 2), nullptr, 16);
+		int r = hex_2_to_dec(str.substr(1, 2));
+        int g = hex_2_to_dec(str.substr(3, 2));
+        int b = hex_2_to_dec(str.substr(5, 2));
         int a;
-        if(colorByte == 4) a = stoi(str.substr(6, 2), nullptr, 16);
+        if(colorByte == 4) a = hex_2_to_dec(str.substr(7, 2));
         if(colorByte == 3){
 			return color(r, g, b);
 		}else{
@@ -255,12 +283,16 @@ namespace cmdOpr{
 		}
 	}
 	void loopTime(){
-		cout << curFileName << '<';
+		if(curFileName == ""){
+			cout << "(No File)";
+		}
+		cout << curFileName << '>';
 		
 		// read commands
 		string cmd, tmp = "";
 		vector<string> cmds;
 		getline(cin, cmd);
+		cmd += ' '; // add a space
 		int len = cmd.length(), wordCount = 0;
 		for(int i = 0; i < len; i++){
 			if(cmd[i] == ' '){
@@ -273,7 +305,34 @@ namespace cmdOpr{
 		wordCount = cmds.size();
 		
 		// analyse commands
-		if(cmds[0] == "set"){
+		if(cmds[0] == "gen"){
+			if(wordCount != 4 && wordCount != 5){
+				cerr << "Wrong Format!" << endl;
+			}else{
+				string fileName = cmds[1];
+				int width = stoi(cmds[2]);
+				int height = stoi(cmds[3]);
+				color filling;
+				if(wordCount == 5){
+					filling = analyseColor(cmds[4]);
+				}else{
+					filling = color(255, 255, 255, 255);
+				}
+				bmpOpr::genBMP(width, height, filling, fileName);
+			}
+		}else if(cmds[0] == "open"){
+			if(wordCount != 2){
+				cerr << "Wrong Format!" << endl;
+			}else{
+				bmpOpr::openBMP(cmds[1]);
+			}
+		}else if(cmds[0] == "save"){
+			if(wordCount != 1){
+				cerr << "Wrong Format!" << endl;
+			}else{
+				bmpOpr::saveBMP();
+			}
+		}else if(cmds[0] == "set"){
 			if(wordCount != 3){
 				cerr << "Wrong Format!" << endl;
 			}else{
@@ -302,7 +361,7 @@ namespace cmdOpr{
 					cerr << "Unknown argument!" << endl;
 					flagSuccess = false;
 				}
-				if(flagSuccess) cout << cmds[1] << ": " << answer;
+				if(flagSuccess) cout << cmds[1] << ": " << answer << endl;
 			}
 		}else if(cmds[0] == "draw"){
 			if(wordCount < 2){
@@ -314,7 +373,7 @@ namespace cmdOpr{
 				}else{
 					int x = stoi(cmds[2]);
 					int y = stoi(cmds[3]);
-					color color_set = analyse_color(cmds[4]);
+					color color_set = analyseColor(cmds[4]);
 					bmpOpr::editPixel(x, y, color_set);
 				}
 			}else if(cmds[1] == "rect"){
@@ -325,7 +384,7 @@ namespace cmdOpr{
 					int yf = stoi(cmds[3]);
 					int xl = stoi(cmds[4]);
 					int yl = stoi(cmds[5]);
-					color color_set = analyse_color(cmds[6]);
+					color color_set = analyseColor(cmds[6]);
 					bmpOpr::drawRect(xf, yf, xl, yl, color_set);
 				}
 			}
@@ -336,6 +395,7 @@ namespace cmdOpr{
 }
 
 int main(){
+//	bmpOpr::genBMP(128, 128, color(0, 255, 255), "a.bmp");
 	while(true){
 		cmdOpr::loopTime();
 	}
