@@ -3,7 +3,7 @@ name: Build on Release
 on:
   release:
     types: [published, edited]  # 发布或编辑 Release 时触发
-  workflow_dispatch:            # 添加手动触发，方便测试
+  workflow_dispatch:            # 手动触发测试
 
 jobs:
   build-multi-platform:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-          # Ubuntu/Linux 配置
+          # Linux 配置
           - os: ubuntu-latest
             asset_name: ebpe-linux
             compile_command: g++ ebpe.cpp -o ebpe -O2 -std=c++14 -static
@@ -31,33 +31,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name || github.ref }}  # Release tag 或默认分支
-      
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
       # 步骤 2: 设置编译环境
       - name: Setup build environment
         run: |
           echo "Building for $RUNNER_OS..."
-          echo "Release tag: ${{ github.event.release.tag_name }}"
           
           if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo rm -rf /var/lib/apt/lists/*   # 清理旧缓存
             sudo apt update
             sudo apt install -y g++ build-essential libc6-dev libstdc++-12-dev
           elif [ "$RUNNER_OS" = "Windows" ]; then
             choco install mingw -y
             echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
           fi
-      
+
       # 步骤 3: 显示编译器信息
       - name: Show compiler version
         run: |
           g++ --version || echo "g++ not available"
           which g++ || echo "g++ not found in PATH"
-      
+
       # 步骤 4: 编译项目
       - name: Compile project
         run: ${{ matrix.compile_command }}
-        shell: bash   # 强制用 bash，避免 Windows PowerShell 不识别
-      
+        shell: bash   # Linux 用 bash，Windows 默认 PowerShell 也可以
+
       # 步骤 5: 验证生成的文件
       - name: Verify binary
         run: |
@@ -69,19 +69,20 @@ jobs:
             fi
           else
             echo "❌ Build failed - output file not found"
-            ls -la ./
+            ls -la ./ 
             exit 1
           fi
-      
-      # 步骤 6: 上传编译好的文件到 Release
+
+      # 步骤 6: 上传 Release 资产
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.output_path }}
+          files: |
+            ${{ matrix.output_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # 步骤 7: 显示完成信息
+
+      # 步骤 7: 完成信息
       - name: Completion message
         run: |
           echo "🎉 Build completed for $RUNNER_OS"
