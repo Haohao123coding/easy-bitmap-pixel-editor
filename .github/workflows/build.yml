@@ -63,9 +63,6 @@ jobs:
           elif [ "$RUNNER_OS" = "Windows" ]; then
             choco install mingw -y
             echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
-          elif [ "$RUNNER_OS" = "macOS" ]; then
-            # macOS 通常已安装 clang/g++
-            brew update && brew install gcc || true
           fi
 
       # 步骤 3: 显示编译器信息
