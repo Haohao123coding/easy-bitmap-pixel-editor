@@ -3,6 +3,7 @@ name: Build on Release
 on:
   release:
     types: [published, edited]  # 发布或编辑 Release 时触发
+  workflow_dispatch:  # 添加手动触发，方便测试
 
 jobs:
   build-multi-platform:
@@ -31,6 +32,23 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name }}  # 检出 Release 对应的 tag
+      
+      # 调试信息：检查代码是否正确检出
+      - name: Debug - Verify checkout
+        run: |
+          echo "📋 检出后的文件列表:"
+          ls -la
+          echo "🔍 检查 ebpe.cpp 是否存在:"
+          if [ -f "ebpe.cpp" ]; then
+            echo "✅ ebpe.cpp 存在"
+            echo "📄 文件前几行:"
+            head -5 ebpe.cpp
+          else
+            echo "❌ ebpe.cpp 不存在！"
+            echo "当前目录内容:"
+            ls -la
+            exit 1
+          fi
 
       # 步骤 2: 设置编译环境
       - name: Setup build environment
