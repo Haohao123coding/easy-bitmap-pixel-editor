@@ -3,7 +3,7 @@ name: Build on Release
 on:
   release:
     types: [published, edited]  # 发布或编辑 Release 时触发
-  workflow_dispatch:  # 添加手动触发，方便测试
+  workflow_dispatch:            # 添加手动触发，方便测试
 
 jobs:
   build-multi-platform:
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}  # 检出 Release 对应的 tag
+          ref: ${{ github.event.release.tag_name || github.ref }}  # Release tag 或默认分支
       
       # 调试信息：检查代码是否正确检出
       - name: Debug - Verify checkout
@@ -56,10 +56,9 @@ jobs:
           echo "Building for $RUNNER_OS..."
           echo "Release tag: ${{ github.event.release.tag_name }}"
           
-          # 根据不同系统安装依赖
           if [ "$RUNNER_OS" = "Linux" ]; then
             sudo apt update
-            sudo apt install -y g++ build-essential
+            sudo apt install g++ build-essential
           elif [ "$RUNNER_OS" = "Windows" ]; then
             choco install mingw -y
             echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
@@ -74,14 +73,17 @@ jobs:
       # 步骤 4: 编译项目
       - name: Compile project
         run: ${{ matrix.compile_command }}
-        
+        shell: bash   # 强制用 bash，避免 Windows PowerShell 不识别
+
       # 步骤 5: 验证生成的文件
       - name: Verify binary
         run: |
           if [ -f "${{ matrix.output_path }}" ]; then
             echo "✅ Build successful!"
             ls -la "${{ matrix.output_path }}"
-            file "${{ matrix.output_path }}" || echo "File command not available"
+            if [ "$RUNNER_OS" = "Linux" ]; then
+              file "${{ matrix.output_path }}"
+            fi
           else
             echo "❌ Build failed - output file not found"
             ls -la ./
@@ -90,14 +92,11 @@ jobs:
 
       # 步骤 6: 上传编译好的文件到 Release
       - name: Upload to Release
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.output_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}  # 使用 Release 提供的上传URL
-          asset_path: ${{ matrix.output_path }}
-          asset_name: ${{ matrix.asset_name }}
-          asset_content_type: ${{ matrix.file_type }}
 
       # 步骤 7: 显示完成信息
       - name: Completion message
