@@ -41,7 +41,7 @@ jobs:
           # 根据不同系统安装依赖
           if [ "$RUNNER_OS" = "Linux" ]; then
             sudo apt-get update
-            sudo apt-get install -y g++ build-essential libstdc++-static
+            sudo apt-get install -y g++ build-essential
           elif [ "$RUNNER_OS" = "Windows" ]; then
             choco install mingw -y
             echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
