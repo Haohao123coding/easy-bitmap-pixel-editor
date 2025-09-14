@@ -80,7 +80,6 @@ namespace bmpOpr{
 	    file.read(reinterpret_cast<char*>(&curFile.fileh), sizeof(fileHeader));
     	file.read(reinterpret_cast<char*>(&curFile.infoh), sizeof(infoHeader));
     	
-    	
     	// check
     	if(curFile.fileh.bfType != 0x4D42){
 			cerr << "Not BMP file!" << endl;
