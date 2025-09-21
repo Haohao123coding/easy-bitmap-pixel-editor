@@ -59,6 +59,12 @@ struct bmpFile{
 	bmpFile(){}
 	bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
 		infoh = infoHeader(bWidth, bHeight, bHasAlpha);
+		
+		// setup vectors
+    	bmap.resize(bHeight);
+    	for(int i = 0; i < bHeight; i++){
+			bmap[i].resize(bWidth);
+		}
 	}
 };
 
@@ -185,6 +191,9 @@ namespace bmpOpr{
 	            file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].b), 1);
 	            file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].g), 1);
 	            file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].r), 1);
+	            if(colorByte == 4){
+					file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].a), 1);
+				}
 			}
 			for(int j = 0; j < paddingSize; j++){
 	            uint8_t padding = 0;
@@ -252,12 +261,12 @@ namespace cmdOpr{
 	}
 	color analyseColor(string str){
 		int colorByte;
-		if(curFile.infoh.biBitCount == 24){
+		int len = str.length();
+		if(len == 7){
 			colorByte = 3;
 		}else{
 			colorByte = 4;
 		}
-		int len = str.length();
 		if(str[0] != '#' || (len != 7 && len != 9)){
 			// wrong format
 			return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
