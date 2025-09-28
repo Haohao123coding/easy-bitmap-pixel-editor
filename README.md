@@ -16,3 +16,7 @@ EBPE 是一个极其轻量化的位图编辑软件，在窗口中输入命令来
 ## 实现方式
 
 使用 C++ 语言。
+
+## 命令使用
+
+| [中文](docs/use_command_zh-cn.md) | [English](docs/use_command_en-us.md) |
