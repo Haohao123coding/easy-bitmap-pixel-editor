@@ -381,7 +381,12 @@ namespace cmdOpr{
 					int x = stoi(cmds[2]);
 					int y = stoi(cmds[3]);
 					color color_set = analyseColor(cmds[4]);
-					bmpOpr::editPixel(x, y, color_set);
+					if(x < 0 || x >= curFile.infoh.biHeight ||
+					y < 0 || y >= curFile.infoh.biWidth){
+						cerr << "Pixel coordinates out of bounds!" << endl;
+					}else{
+						bmpOpr::editPixel(x, y, color_set);
+					}
 				}
 			}else if(cmds[1] == "rect"){
 				if(wordCount != 7){
@@ -392,7 +397,14 @@ namespace cmdOpr{
 					int xl = stoi(cmds[4]);
 					int yl = stoi(cmds[5]);
 					color color_set = analyseColor(cmds[6]);
-					bmpOpr::drawRect(xf, yf, xl, yl, color_set);
+					if(xf < 0 || xf >= curFile.infoh.biHeight ||
+					xl < 0 || xl >= curFile.infoh.biHeight ||
+					yf < 0 || yf >= curFile.infoh.biWidth ||
+					yl < 0 || yl >= curFile.infoh.biWidth){
+						cerr << "Pixel coordinates out of bounds!" << endl;
+					}else{
+						bmpOpr::drawRect(xf, yf, xl, yl, color_set);
+					}
 				}
 			}
 		}else if(cmds[0] == "exit"){
