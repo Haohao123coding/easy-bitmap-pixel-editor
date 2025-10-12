@@ -389,21 +389,44 @@ namespace cmdOpr{
 					}
 				}
 			}else if(cmds[1] == "rect"){
-				if(wordCount != 7){
-					cerr << "Wrong Format!" << endl;
+				if(wordCount != 7 && wordCount != 8 && wordCount != 9){
+					cerr << "Wrong Format!" << wordCount << endl;
 				}else{
-					int xf = stoi(cmds[2]);
-					int yf = stoi(cmds[3]);
-					int xl = stoi(cmds[4]);
-					int yl = stoi(cmds[5]);
-					color color_set = analyseColor(cmds[6]);
+					int xf, yf, xl, yl;
+					color color_set;
+					if(cmds[2] != "filled" && cmds[2] != "unfilled"){
+						xf = stoi(cmds[2]);
+						yf = stoi(cmds[3]);
+						xl = stoi(cmds[4]);
+						yl = stoi(cmds[5]);
+						color_set = analyseColor(cmds[6]);
+					}else{
+						xf = stoi(cmds[3]);
+						yf = stoi(cmds[4]);
+						xl = stoi(cmds[5]);
+						yl = stoi(cmds[6]);
+						color_set = analyseColor(cmds[7]);
+					}
 					if(xf < 0 || xf >= curFile.infoh.biHeight ||
 					xl < 0 || xl >= curFile.infoh.biHeight ||
 					yf < 0 || yf >= curFile.infoh.biWidth ||
 					yl < 0 || yl >= curFile.infoh.biWidth){
 						cerr << "Pixel coordinates out of bounds!" << endl;
 					}else{
-						bmpOpr::drawRect(xf, yf, xl, yl, color_set);
+						if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
+							bmpOpr::drawRect(xf, yf, xl, yl, color_set);
+						}else{
+							int borderPixelCount;
+							if(wordCount != 9){
+								borderPixelCount = 1;
+							}else{
+								borderPixelCount = stoi(cmds[8]);
+							}
+							bmpOpr::drawRect(xf, yf, xf + borderPixelCount - 1, yl, color_set);
+							bmpOpr::drawRect(xf, yf, xl, yf + borderPixelCount - 1, color_set);
+							bmpOpr::drawRect(xl - borderPixelCount + 1, yf, xl, yl, color_set);
+							bmpOpr::drawRect(xf, yl - borderPixelCount + 1, xl, yl, color_set);
+						}
 					}
 				}
 			}

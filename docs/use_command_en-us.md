@@ -37,7 +37,7 @@ Saves the current file to disk.
 Usage:
 - `exit`
 
-Exits the process.
+Saves the current file to disk and exits the process.
 
 ### set
 
@@ -63,8 +63,21 @@ Gets the value of `item`.
 
 ### draw
 
-Usage:
-- `draw pixel <x> <y> <color>`
-- `draw rect <xFirst> <yFirst> <xLast> <yLast> <color>`
+Coordinates start from 0. If coordinates are out of bounds, output `Pixel coordinates out of bounds!`.
 
-Draws a pixel or rectangle using `color`. Coordinates start from 0. If coordinates are out of bounds, it will output `Pixel coordinates out of bounds!`.
+-   **pixel**
+    
+    Usage:
+    - `draw pixel <x> <y> <color>`
+    
+    Draw a pixel at the specified coordinates using `color`.
+
+-   **rect**
+    
+    Usage:
+    - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect filled <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect unfilled <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect unfilled <borderPixelCount> <xFirst> <yFirst> <xLast> <yLast> <color>`
+    
+    Draw a rectangle using `color`. `filled` means filled rectangle, `unfilled` means unfilled (border only, with `borderPixelCount` specifying the line width - the outermost edge remains at the original position, default is `1`). Default is filled.

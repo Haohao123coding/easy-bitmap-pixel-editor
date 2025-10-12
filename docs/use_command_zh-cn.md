@@ -35,7 +35,7 @@
 用法：
 - `exit`
 
-退出进程。
+保存当前文件至磁盘后退出进程。
 
 ### set
 
@@ -61,8 +61,21 @@
 
 ### draw
 
-用法：
-- `draw pixel <x> <y> <color>`
-- `draw rect <xFirst> <yFirst> <xLast> <yLast> <color>`
+坐标从 0 开始。如果坐标越界，则输出 `Pixel coordinates out of bounds!`。
 
-用 `color` 绘制像素或矩形，坐标从 0 开始。如果坐标越界，则输出 `Pixel coordinates out of bounds!`。
+-   **pixel**
+    
+    用法：
+    - `draw pixel <x> <y> <color>`
+    
+    用 `color` 绘制像素或矩形。
+
+-   **rect**
+    
+    用法：
+    - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect filled <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect unfilled <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect unfilled <xFirst> <yFirst> <xLast> <yLast> <color> <borderPixelCount>`
+    
+    用 `color` 绘制矩形。`filled` 表示填充，`unfilled` 表示不填充（`borderPixelCount` 的线段宽度，最外层在原本的位置，默认为 `1`）。默认为填充。
