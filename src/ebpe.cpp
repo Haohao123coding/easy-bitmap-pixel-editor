@@ -59,7 +59,7 @@ struct bmpFile{
 	bmpFile(){}
 	bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
 		infoh = infoHeader(bWidth, bHeight, bHasAlpha);
-		
+
 		// setup vectors
     	bmap.resize(bHeight);
     	for(int i = 0; i < bHeight; i++){
@@ -81,11 +81,11 @@ namespace bmpOpr{
 			cerr << "No file!" << endl;
 			return;
 		}
-		
+
 		// read headers
 	    file.read(reinterpret_cast<char*>(&curFile.fileh), sizeof(fileHeader));
     	file.read(reinterpret_cast<char*>(&curFile.infoh), sizeof(infoHeader));
-    	
+
     	// check
     	if(curFile.fileh.bfType != 0x4D42){
 			cerr << "Not BMP file!" << endl;
@@ -110,20 +110,20 @@ namespace bmpOpr{
 			curFile.infoh.biClrUsed != 0 ||
 			curFile.infoh.biClrImportant != 0
 		){ cerr << "No Support For This Format!"; return; }
-		
+
 		// calc
     	int width = curFile.infoh.biWidth;
     	int height = curFile.infoh.biHeight;
     	int colorByte = curFile.infoh.biBitCount / 8;
     	int rowSize = (width * colorByte + 3) / 4 * 4;
     	int paddingSize = rowSize - width * colorByte;
-    	
+
     	// setup vectors
     	curFile.bmap.resize(height);
     	for(int i = 0; i < height; i++){
 			curFile.bmap[i].resize(width);
 		}
-    	
+
     	// read pixels
     	for(int i = height - 1; i >= 0; i--){
 	        for(int j = 0; j < width; j++){
@@ -139,7 +139,7 @@ namespace bmpOpr{
 	        }
 	        file.seekg(paddingSize, ios::cur);
 	    }
-	    
+
 	    // misc
 	    curFileName = fileName;
 	}
@@ -149,7 +149,7 @@ namespace bmpOpr{
     	int height = curFile.infoh.biHeight;
     	int colorByte = curFile.infoh.biBitCount / 8;
     	int rowSize = (width * colorByte + 3) / 4 * 4;
-    	
+
     	// set headers
     	curFile.infoh.biWidth = width;
 		curFile.infoh.biHeight = height;
@@ -164,27 +164,27 @@ namespace bmpOpr{
 			cerr << "No file!" << endl;
 			return;
 		}
-		
+
 		// calc
     	int width = curFile.infoh.biWidth;
     	int height = curFile.infoh.biHeight;
     	int colorByte = curFile.infoh.biBitCount / 8;
     	int rowSize = (width * colorByte + 3) / 4 * 4;
     	int paddingSize = rowSize - width * colorByte;
-    	
+
     	// calc and set
     	calcSetBMP();
-		
+
 		// write headers
 		file.write(reinterpret_cast<const char*>(&curFile.fileh), sizeof(fileHeader));
     	file.write(reinterpret_cast<const char*>(&curFile.infoh), sizeof(infoHeader));
-    	
+
     	// setup vectors
     	curFile.bmap.resize(height);
     	for(int i = 0; i < height; i++){
 			curFile.bmap[i].resize(width);
 		}
-    	
+
     	// write pixels
     	for(int i = height - 1; i >= 0; i--){
 			for(int j = 0; j < width; j++){
@@ -206,7 +206,7 @@ namespace bmpOpr{
 		bmpFile newFile;
 		int colorByte = filling.bit / 8;
 		int rowSize = (width * colorByte + 3) / 4 * 4;
-		
+
 		// setup file header and info header
 		newFile.infoh.biWidth = width;
 		newFile.infoh.biHeight = height;
@@ -214,7 +214,7 @@ namespace bmpOpr{
 		newFile.infoh.biSizeImage = rowSize * height;
 		newFile.fileh.bfSize =
 		sizeof(newFile.fileh) + sizeof(newFile.infoh) + newFile.infoh.biSizeImage;
-		
+
 		// setup pixels
 		vector<color> tmp;
 		for(int i = 0; i < width; i++){
@@ -223,7 +223,7 @@ namespace bmpOpr{
 		for(int i = 0; i < height; i++){
 			newFile.bmap.push_back(tmp);
 		}
-		
+
 		// save file
 		curFile = newFile;
 		curFileName = fileName;
@@ -294,7 +294,7 @@ namespace cmdOpr{
 			cout << "(No File)";
 		}
 		cout << curFileName << '>';
-		
+
 		// read commands
 		string cmd, tmp = "";
 		vector<string> cmds;
@@ -310,7 +310,7 @@ namespace cmdOpr{
 			}
 		}
 		wordCount = cmds.size();
-		
+
 		// analyse commands
 		if(cmds[0] == "gen"){
 			if(wordCount != 4 && wordCount != 5){
