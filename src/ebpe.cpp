@@ -52,10 +52,12 @@ struct infoHeader{
     }
 };
 
-struct bmpFile{
+class bmpFile{
+private:
     fileHeader fileh;
     infoHeader infoh;
     vector<vector<color>> bmap;
+public:
     bmpFile(){}
     bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
         infoh = infoHeader(bWidth, bHeight, bHasAlpha);
@@ -66,6 +68,13 @@ struct bmpFile{
             bmap[i].resize(bWidth);
         }
     }
+
+    fileHeader getFileHeader(){ return fileh; }
+    infoHeader getInfoHeader(){ return infoh; }
+    vector<vector<color>> getBmap(){ return bmap; }
+    void setFileHeader(fileHeader data){ fileh = data; }
+    void setInfoHeader(infoHeader data){ infoh = data; }
+    void setBmap(vector<vector<color>> data){ bmap = data; }
 };
 
 #pragma pack(pop) // Restore byte alignment
@@ -83,58 +92,60 @@ namespace bmpOpr{
         }
 
         // read headers
-        file.read(reinterpret_cast<char*>(&curFile.fileh), sizeof(fileHeader));
-        file.read(reinterpret_cast<char*>(&curFile.infoh), sizeof(infoHeader));
+        file.read(reinterpret_cast<char*>(&curFile.getFileHeader()), sizeof(fileHeader));
+        file.read(reinterpret_cast<char*>(&curFile.getInfoHeader()), sizeof(infoHeader));
 
         // check
-        if(curFile.fileh.bfType != 0x4D42){
+        if(curFile.getFileHeader().bfType != 0x4D42){
             cerr << "Not BMP file!" << endl;
         }
         if(
-            curFile.fileh.bfReserved1 != 0 ||
-            curFile.fileh.bfReserved2 != 0 ||
-            curFile.fileh.bfOffBits != 54
+            curFile.getFileHeader().bfReserved1 != 0 ||
+            curFile.getFileHeader().bfReserved2 != 0 ||
+            curFile.getFileHeader().bfOffBits != 54
         ){ cerr << "No Support For This Format!"; return; }
         if(
-            curFile.infoh.biSize != 40 ||
-            curFile.infoh.biWidth < 0 ||
-            curFile.infoh.biHeight < 0 ||
-            curFile.infoh.biPlanes != 1 ||
+            curFile.getInfoHeader().biSize != 40 ||
+            curFile.getInfoHeader().biWidth < 0 ||
+            curFile.getInfoHeader().biHeight < 0 ||
+            curFile.getInfoHeader().biPlanes != 1 ||
             (
-                curFile.infoh.biBitCount != 24 &&
-                curFile.infoh.biBitCount != 32
+                curFile.getInfoHeader().biBitCount != 24 &&
+                curFile.getInfoHeader().biBitCount != 32
             ) ||
-            curFile.infoh.biCompression != 0 ||
-            curFile.infoh.biXPelsPerMeter != 0 ||
-            curFile.infoh.biYPelsPerMeter != 0 ||
-            curFile.infoh.biClrUsed != 0 ||
-            curFile.infoh.biClrImportant != 0
+            curFile.getInfoHeader().biCompression != 0 ||
+            curFile.getInfoHeader().biXPelsPerMeter != 0 ||
+            curFile.getInfoHeader().biYPelsPerMeter != 0 ||
+            curFile.getInfoHeader().biClrUsed != 0 ||
+            curFile.getInfoHeader().biClrImportant != 0
         ){ cerr << "No Support For This Format!"; return; }
 
         // calc
-        int width = curFile.infoh.biWidth;
-        int height = curFile.infoh.biHeight;
-        int colorByte = curFile.infoh.biBitCount / 8;
+        int width = curFile.getInfoHeader().biWidth;
+        int height = curFile.getInfoHeader().biHeight;
+        int colorByte = curFile.getInfoHeader().biBitCount / 8;
         int rowSize = (width * colorByte + 3) / 4 * 4;
         int paddingSize = rowSize - width * colorByte;
 
         // setup vectors
-        curFile.bmap.resize(height);
+        vector<vector<color>> bm;
+        bm.resize(height);
         for(int i = 0; i < height; i++){
-            curFile.bmap[i].resize(width);
+            bm[i].resize(width);
         }
+        curFile.setBmap(bm);
 
         // read pixels
         for(int i = height - 1; i >= 0; i--){
             for(int j = 0; j < width; j++){
-                file.read(reinterpret_cast<char*>(&curFile.bmap[i][j].b), 1);
-                file.read(reinterpret_cast<char*>(&curFile.bmap[i][j].g), 1);
-                file.read(reinterpret_cast<char*>(&curFile.bmap[i][j].r), 1);
+                file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].b), 1);
+                file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].g), 1);
+                file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].r), 1);
                 if(colorByte == 4){
-                    file.read(reinterpret_cast<char*>(&curFile.bmap[i][j].a), 1);
-                    curFile.bmap[i][j].bit = 32;
+                    file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].a), 1);
+                    curFile.getBmap()[i][j].bit = 32;
                 }else{
-                    curFile.bmap[i][j].bit = 24;
+                    curFile.getBmap()[i][j].bit = 24;
                 }
             }
             file.seekg(paddingSize, ios::cur);
@@ -145,17 +156,21 @@ namespace bmpOpr{
     }
     void calcSetBMP(){
         // calc
-        int width = curFile.infoh.biWidth;
-        int height = curFile.infoh.biHeight;
-        int colorByte = curFile.infoh.biBitCount / 8;
+        int width = curFile.getInfoHeader().biWidth;
+        int height = curFile.getInfoHeader().biHeight;
+        int colorByte = curFile.getInfoHeader().biBitCount / 8;
         int rowSize = (width * colorByte + 3) / 4 * 4;
 
         // set headers
-        curFile.infoh.biWidth = width;
-        curFile.infoh.biHeight = height;
-        curFile.infoh.biSizeImage = rowSize * height;
-        curFile.fileh.bfSize =
-        sizeof(curFile.fileh) + sizeof(curFile.infoh) + curFile.infoh.biSizeImage;
+        fileHeader fh = curFile.getFileHeader();
+        infoHeader ih = curFile.getInfoHeader();
+        ih.biWidth = width;
+        ih.biHeight = height;
+        ih.biSizeImage = rowSize * height;
+        fh.bfSize =
+        sizeof(curFile.getFileHeader()) + sizeof(curFile.getInfoHeader()) + curFile.getInfoHeader().biSizeImage;
+        curFile.setFileHeader(fh);
+        curFile.setInfoHeader(ih);
     }
     void saveBMP(){
         // open file
@@ -166,9 +181,9 @@ namespace bmpOpr{
         }
 
         // calc
-        int width = curFile.infoh.biWidth;
-        int height = curFile.infoh.biHeight;
-        int colorByte = curFile.infoh.biBitCount / 8;
+        int width = curFile.getInfoHeader().biWidth;
+        int height = curFile.getInfoHeader().biHeight;
+        int colorByte = curFile.getInfoHeader().biBitCount / 8;
         int rowSize = (width * colorByte + 3) / 4 * 4;
         int paddingSize = rowSize - width * colorByte;
 
@@ -176,23 +191,25 @@ namespace bmpOpr{
         calcSetBMP();
 
         // write headers
-        file.write(reinterpret_cast<const char*>(&curFile.fileh), sizeof(fileHeader));
-        file.write(reinterpret_cast<const char*>(&curFile.infoh), sizeof(infoHeader));
+        file.write(reinterpret_cast<const char*>(&curFile.getFileHeader()), sizeof(fileHeader));
+        file.write(reinterpret_cast<const char*>(&curFile.getInfoHeader()), sizeof(infoHeader));
 
         // setup vectors
-        curFile.bmap.resize(height);
+        vector<vector<color>> bm;
+        bm.resize(height);
         for(int i = 0; i < height; i++){
-            curFile.bmap[i].resize(width);
+            bm[i].resize(width);
         }
+        curFile.setBmap(bm);
 
         // write pixels
         for(int i = height - 1; i >= 0; i--){
             for(int j = 0; j < width; j++){
-                file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].b), 1);
-                file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].g), 1);
-                file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].r), 1);
+                file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].b), 1);
+                file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].g), 1);
+                file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].r), 1);
                 if(colorByte == 4){
-                    file.write(reinterpret_cast<const char*>(&curFile.bmap[i][j].a), 1);
+                    file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].a), 1);
                 }
             }
             for(int j = 0; j < paddingSize; j++){
@@ -208,21 +225,27 @@ namespace bmpOpr{
         int rowSize = (width * colorByte + 3) / 4 * 4;
 
         // setup file header and info header
-        newFile.infoh.biWidth = width;
-        newFile.infoh.biHeight = height;
-        newFile.infoh.biBitCount = filling.bit;
-        newFile.infoh.biSizeImage = rowSize * height;
-        newFile.fileh.bfSize =
-        sizeof(newFile.fileh) + sizeof(newFile.infoh) + newFile.infoh.biSizeImage;
+        fileHeader fh;
+        infoHeader ih;
+        ih.biWidth = width;
+        ih.biHeight = height;
+        ih.biBitCount = filling.bit;
+        ih.biSizeImage = rowSize * height;
+        fh.bfSize =
+        sizeof(newFile.getFileHeader()) + sizeof(newFile.getInfoHeader()) + newFile.getInfoHeader().biSizeImage;
+        newFile.setFileHeader(fh);
+        newFile.setInfoHeader(ih);
 
         // setup pixels
+        vector<vector<color>> bm;
         vector<color> tmp;
         for(int i = 0; i < width; i++){
             tmp.push_back(filling);
         }
         for(int i = 0; i < height; i++){
-            newFile.bmap.push_back(tmp);
+            bm.push_back(tmp);
         }
+        newFile.setBmap(bm);
 
         // save file
         curFile = newFile;
@@ -231,7 +254,9 @@ namespace bmpOpr{
     }
     void editPixel(int32_t x, int32_t y, color c){
         // x, y is from zero
-        curFile.bmap[x][y] = c;
+        vector<vector<color>> bm = curFile.getBmap();
+        bm[x][y] = c;
+        curFile.setBmap(bm);
     }
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
         // X first; X last; Y first; Y last
@@ -352,15 +377,19 @@ namespace cmdOpr{
                 cerr << "Wrong Format!" << endl;
             }else{
                 bool flagSuccess = true;
+                infoHeader ih = curFile.getInfoHeader();
                 if(cmds[1] == "width"){
-                    curFile.infoh.biWidth = stoi(cmds[2]);
+                    ih.biWidth = stoi(cmds[2]);
                 }else if(cmds[1] == "height"){
-                    curFile.infoh.biHeight = stoi(cmds[2]);
+                    ih.biHeight = stoi(cmds[2]);
                 }else{
                     cerr << "Unknown argument!" << endl;
                     flagSuccess = false;
                 }
-                if(flagSuccess) bmpOpr::calcSetBMP();
+                if(flagSuccess){
+                    curFile.setInfoHeader(ih);
+                    bmpOpr::calcSetBMP();
+                }
             }
         }else if(cmds[0] == "get"){
             if(wordCount != 2){
@@ -369,9 +398,9 @@ namespace cmdOpr{
                 bool flagSuccess = true;
                 int answer;
                 if(cmds[1] == "width"){
-                    answer = curFile.infoh.biWidth;
+                    answer = curFile.getInfoHeader().biWidth;
                 }else if(cmds[1] == "height"){
-                    answer = curFile.infoh.biHeight;
+                    answer = curFile.getInfoHeader().biHeight;
                 }else{
                     cerr << "Unknown argument!" << endl;
                     flagSuccess = false;
@@ -389,8 +418,8 @@ namespace cmdOpr{
                     int x = stoi(cmds[2]);
                     int y = stoi(cmds[3]);
                     color color_set = analyseColor(cmds[4]);
-                    if(x < 0 || x >= curFile.infoh.biHeight ||
-                    y < 0 || y >= curFile.infoh.biWidth){
+                    if(x < 0 || x >= curFile.getInfoHeader().biHeight ||
+                    y < 0 || y >= curFile.getInfoHeader().biWidth){
                         cerr << "Pixel coordinates out of bounds!" << endl;
                     }else{
                         bmpOpr::editPixel(x, y, color_set);
@@ -412,10 +441,10 @@ namespace cmdOpr{
                     xl = stoi(cmds[ptr++]);
                     yl = stoi(cmds[ptr++]);
                     color_set = analyseColor(cmds[ptr++]);
-                    if(xf < 0 || xf >= curFile.infoh.biHeight ||
-                    xl < 0 || xl >= curFile.infoh.biHeight ||
-                    yf < 0 || yf >= curFile.infoh.biWidth ||
-                    yl < 0 || yl >= curFile.infoh.biWidth){
+                    if(xf < 0 || xf >= curFile.getInfoHeader().biHeight ||
+                    xl < 0 || xl >= curFile.getInfoHeader().biHeight ||
+                    yf < 0 || yf >= curFile.getInfoHeader().biWidth ||
+                    yl < 0 || yl >= curFile.getInfoHeader().biWidth){
                         cerr << "Pixel coordinates out of bounds!" << endl;
                     }else{
                         if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
