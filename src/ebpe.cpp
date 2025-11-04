@@ -8,14 +8,14 @@
 using namespace std;
 
 struct color{
-    int bit; // 24 or 32
-    int r, g, b, a;
+    uint16_t bit; // 24 or 32
+    uint8_t r, g, b, a;
     color(){}
-    color(int x, int y, int z){
+    color(uint8_t x, uint8_t y, uint8_t z){
         bit = 24;
         r = x; g = y; b = z;
     }
-    color(int x, int y, int z, int t){
+    color(uint8_t x, uint8_t y, uint8_t z, uint8_t t){
         bit = 32;
         r = x; g = y; b = z; a = t;
     }
@@ -64,7 +64,7 @@ public:
 
         // setup vectors
         bmap.resize(bHeight);
-        for(int i = 0; i < bHeight; i++){
+        for(int32_t i = 0; i < bHeight; i++){
             bmap[i].resize(bWidth);
         }
     }
@@ -85,8 +85,8 @@ public:
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
         // X first; X last; Y first; Y last
         // x, y is from zero
-        for(int i = xf; i <= xl; i++){
-            for(int j = yf; j <= yl; j++){
+        for(int32_t i = xf; i <= xl; i++){
+            for(int32_t j = yf; j <= yl; j++){
                 editPixel(i, j, c);
             }
         }
@@ -145,23 +145,23 @@ namespace bmpOpr{
         ){ cerr << "No Support For This Format!"; return; }
 
         // calc
-        int width = curFile.getInfoHeader().biWidth;
-        int height = curFile.getInfoHeader().biHeight;
-        int colorByte = curFile.getInfoHeader().biBitCount / 8;
-        int rowSize = (width * colorByte + 3) / 4 * 4;
-        int paddingSize = rowSize - width * colorByte;
+        int32_t width = curFile.getInfoHeader().biWidth;
+        int32_t height = curFile.getInfoHeader().biHeight;
+        int16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
+        int32_t rowSize = (width * colorByte + 3) / 4 * 4;
+        int32_t paddingSize = rowSize - width * colorByte;
 
         // setup vectors
         vector<vector<color>> bm;
         bm.resize(height);
-        for(int i = 0; i < height; i++){
+        for(int32_t i = 0; i < height; i++){
             bm[i].resize(width);
         }
         curFile.setBmap(bm);
 
         // read pixels
-        for(int i = height - 1; i >= 0; i--){
-            for(int j = 0; j < width; j++){
+        for(int32_t i = height - 1; i >= 0; i--){
+            for(int32_t j = 0; j < width; j++){
                 file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].b), 1);
                 file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].g), 1);
                 file.read(reinterpret_cast<char*>(&curFile.getBmap()[i][j].r), 1);
@@ -180,10 +180,10 @@ namespace bmpOpr{
     }
     void calcSetBMP(){
         // calc
-        int width = curFile.getInfoHeader().biWidth;
-        int height = curFile.getInfoHeader().biHeight;
-        int colorByte = curFile.getInfoHeader().biBitCount / 8;
-        int rowSize = (width * colorByte + 3) / 4 * 4;
+        int32_t width = curFile.getInfoHeader().biWidth;
+        int32_t height = curFile.getInfoHeader().biHeight;
+        int16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
+        int32_t rowSize = (width * colorByte + 3) / 4 * 4;
 
         // set headers
         fileHeader fh = curFile.getFileHeader();
@@ -205,11 +205,11 @@ namespace bmpOpr{
         }
 
         // calc
-        int width = curFile.getInfoHeader().biWidth;
-        int height = curFile.getInfoHeader().biHeight;
-        int colorByte = curFile.getInfoHeader().biBitCount / 8;
-        int rowSize = (width * colorByte + 3) / 4 * 4;
-        int paddingSize = rowSize - width * colorByte;
+        int32_t width = curFile.getInfoHeader().biWidth;
+        int32_t height = curFile.getInfoHeader().biHeight;
+        int16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
+        int32_t rowSize = (width * colorByte + 3) / 4 * 4;
+        int32_t paddingSize = rowSize - width * colorByte;
 
         // calc and set
         calcSetBMP();
@@ -221,14 +221,14 @@ namespace bmpOpr{
         // setup vectors
         vector<vector<color>> bm;
         bm.resize(height);
-        for(int i = 0; i < height; i++){
+        for(int32_t i = 0; i < height; i++){
             bm[i].resize(width);
         }
         curFile.setBmap(bm);
 
         // write pixels
-        for(int i = height - 1; i >= 0; i--){
-            for(int j = 0; j < width; j++){
+        for(int32_t i = height - 1; i >= 0; i--){
+            for(int32_t j = 0; j < width; j++){
                 file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].b), 1);
                 file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].g), 1);
                 file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].r), 1);
@@ -236,7 +236,7 @@ namespace bmpOpr{
                     file.write(reinterpret_cast<const char*>(&curFile.getBmap()[i][j].a), 1);
                 }
             }
-            for(int j = 0; j < paddingSize; j++){
+            for(int32_t j = 0; j < paddingSize; j++){
                 uint8_t padding = 0;
                 file.write(reinterpret_cast<const char*>(&padding), 1);
             }
@@ -245,8 +245,8 @@ namespace bmpOpr{
     void genBMP(int32_t width, int32_t height, color filling, string fileName){
         // calc
         bmpFile newFile;
-        int colorByte = filling.bit / 8;
-        int rowSize = (width * colorByte + 3) / 4 * 4;
+        int16_t colorByte = filling.bit / 8;
+        int32_t rowSize = (width * colorByte + 3) / 4 * 4;
 
         // setup file header and info header
         fileHeader fh;
@@ -263,10 +263,10 @@ namespace bmpOpr{
         // setup pixels
         vector<vector<color>> bm;
         vector<color> tmp;
-        for(int i = 0; i < width; i++){
+        for(int32_t i = 0; i < width; i++){
             tmp.push_back(filling);
         }
-        for(int i = 0; i < height; i++){
+        for(int32_t i = 0; i < height; i++){
             bm.push_back(tmp);
         }
         newFile.setBmap(bm);
@@ -279,7 +279,7 @@ namespace bmpOpr{
 }
 
 namespace cmdOpr{
-    int hex_to_dec(char hex){
+    int32_t hex_to_dec(char hex){
         if(hex >= '0' && hex <= '9'){
             return hex - '0';
         }else if(hex >= 'A' && hex <= 'F'){
@@ -290,12 +290,12 @@ namespace cmdOpr{
             return 0;
         }
     }
-    int hex_2_to_dec(string hex){
+    int32_t hex_2_to_dec(string hex){
         return hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]);
     }
     color analyseColor(string str){
-        int colorByte;
-        int len = str.length();
+        int32_t colorByte;
+        int32_t len = str.length();
         if(len == 7){
             colorByte = 3;
         }else{
@@ -305,17 +305,17 @@ namespace cmdOpr{
             // wrong format
             return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
         }
-        for(int i = 1; i < len; i++){
+        for(int32_t i = 1; i < len; i++){
             if(!((str[i] >= '0' && str[i] <= '9') ||
             (str[i] >= 'a' && str[i] <= 'f'))){
                 // wrong format
                 return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
             }
         }
-        int r = hex_2_to_dec(str.substr(1, 2));
-        int g = hex_2_to_dec(str.substr(3, 2));
-        int b = hex_2_to_dec(str.substr(5, 2));
-        int a;
+        int16_t r = hex_2_to_dec(str.substr(1, 2));
+        int16_t g = hex_2_to_dec(str.substr(3, 2));
+        int16_t b = hex_2_to_dec(str.substr(5, 2));
+        int16_t a;
         if(colorByte == 4) a = hex_2_to_dec(str.substr(7, 2));
         if(colorByte == 3){
             return color(r, g, b);
@@ -324,13 +324,13 @@ namespace cmdOpr{
         }
     }
 
-    int analyseGen(int wordCount, vector<string> cmds){
+    int32_t analyseGen(int32_t wordCount, vector<string> cmds){
         if(wordCount != 4 && wordCount != 5){
             return 10;
         }
         string fileName = cmds[1];
-        int width = stoi(cmds[2]);
-        int height = stoi(cmds[3]);
+        int32_t width = stoi(cmds[2]);
+        int32_t height = stoi(cmds[3]);
         color filling;
         if(wordCount == 5){
             filling = analyseColor(cmds[4]);
@@ -340,21 +340,21 @@ namespace cmdOpr{
         bmpOpr::genBMP(width, height, filling, fileName);
         return 0;
     }
-    int analyseOpen(int wordCount, vector<string> cmds){
+    int32_t analyseOpen(int32_t wordCount, vector<string> cmds){
         if(wordCount != 2){
             return 10;
         }
         bmpOpr::openBMP(cmds[1]);
         return 0;
     }
-    int analyseSave(int wordCount, vector<string> cmds){
+    int32_t analyseSave(int32_t wordCount, vector<string> cmds){
         if(wordCount != 1){
             return 10;
         }
         bmpOpr::saveBMP();
         return 0;
     }
-    int analyseSet(int wordCount, vector<string> cmds){
+    int32_t analyseSet(int32_t wordCount, vector<string> cmds){
         if(wordCount != 3){
             return 10;
         }
@@ -370,11 +370,11 @@ namespace cmdOpr{
         bmpOpr::calcSetBMP();
         return 0;
     }
-    int analyseGet(int wordCount, vector<string> cmds){
+    int32_t analyseGet(int32_t wordCount, vector<string> cmds){
         if(wordCount != 2){
             return 10;
         }
-        int answer = 0;
+        int32_t answer = 0;
         if(cmds[1] == "width"){
             answer = curFile.getInfoHeader().biWidth;
         }else if(cmds[1] == "height"){
@@ -385,7 +385,7 @@ namespace cmdOpr{
         cout << cmds[1] << ": " << answer << endl;
         return 0;
     }
-    int analyseDraw(int wordCount, vector<string> cmds){
+    int32_t analyseDraw(int32_t wordCount, vector<string> cmds){
         if(wordCount < 2){
             return 10;
         }
@@ -393,8 +393,8 @@ namespace cmdOpr{
             if(wordCount != 5){
                 return 10;
             }
-            int x = stoi(cmds[2]);
-            int y = stoi(cmds[3]);
+            int32_t x = stoi(cmds[2]);
+            int32_t y = stoi(cmds[3]);
             color color_set = analyseColor(cmds[4]);
             if(x < 0 || x >= curFile.getInfoHeader().biHeight ||
             y < 0 || y >= curFile.getInfoHeader().biWidth){
@@ -406,7 +406,7 @@ namespace cmdOpr{
             if(wordCount != 7 && wordCount != 8 && wordCount != 9){
                 return 10;
             }
-            int xf, yf, xl, yl, ptr;
+            int32_t xf, yf, xl, yl, ptr;
             color color_set;
             if(cmds[2] != "filled" && cmds[2] != "unfilled"){
                 ptr = 2;
@@ -427,7 +427,7 @@ namespace cmdOpr{
             if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
                 curFile.drawRect(xf, yf, xl, yl, color_set);
             }else{
-                int borderPixelCount;
+                int32_t borderPixelCount;
                 if(wordCount != 9){
                     borderPixelCount = 1;
                 }else{
@@ -439,7 +439,7 @@ namespace cmdOpr{
         }
         return 11;
     }
-    int analyseExit(int wordCount, vector<string> cmds){
+    int32_t analyseExit(int32_t wordCount, vector<string> cmds){
         if(wordCount != 1){
             return 10;
         }
@@ -447,7 +447,7 @@ namespace cmdOpr{
         exit(0);
     }
 
-    void outPutError(int errCode){
+    void outPutError(int32_t errCode){
         if(errCode == 10){
             cerr << "Wrong Format!" << endl;
         }else if(errCode == 11){
@@ -470,8 +470,8 @@ namespace cmdOpr{
         vector<string> cmds;
         getline(cin, cmd);
         cmd += ' '; // add a space
-        int len = cmd.length(), wordCount = 0;
-        for(int i = 0; i < len; i++){
+        int32_t len = cmd.length(), wordCount = 0;
+        for(int32_t i = 0; i < len; i++){
             if(cmd[i] == ' '){
                 cmds.push_back(tmp);
                 tmp = "";
@@ -482,7 +482,7 @@ namespace cmdOpr{
         wordCount = cmds.size();
 
         // analyse commands
-        int res = 0;
+        int32_t res = 0;
         if(cmds[0] == "gen"){
             res = analyseGen(wordCount, cmds);
         }else if(cmds[0] == "open"){
