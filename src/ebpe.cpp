@@ -323,6 +323,142 @@ namespace cmdOpr{
             return color(r, g, b, a);
         }
     }
+
+    int analyseGen(int wordCount, vector<string> cmds){
+        if(wordCount != 4 && wordCount != 5){
+            return 10;
+        }
+        string fileName = cmds[1];
+        int width = stoi(cmds[2]);
+        int height = stoi(cmds[3]);
+        color filling;
+        if(wordCount == 5){
+            filling = analyseColor(cmds[4]);
+        }else{
+            filling = color(255, 255, 255, 255);
+        }
+        bmpOpr::genBMP(width, height, filling, fileName);
+        return 0;
+    }
+    int analyseOpen(int wordCount, vector<string> cmds){
+        if(wordCount != 2){
+            return 10;
+        }
+        bmpOpr::openBMP(cmds[1]);
+        return 0;
+    }
+    int analyseSave(int wordCount, vector<string> cmds){
+        if(wordCount != 1){
+            return 10;
+        }
+        bmpOpr::saveBMP();
+        return 0;
+    }
+    int analyseSet(int wordCount, vector<string> cmds){
+        if(wordCount != 3){
+            return 10;
+        }
+        infoHeader ih = curFile.getInfoHeader();
+        if(cmds[1] == "width"){
+            ih.biWidth = stoi(cmds[2]);
+        }else if(cmds[1] == "height"){
+            ih.biHeight = stoi(cmds[2]);
+        }else{
+            return 11;
+        }
+        curFile.setInfoHeader(ih);
+        bmpOpr::calcSetBMP();
+        return 0;
+    }
+    int analyseGet(int wordCount, vector<string> cmds){
+        if(wordCount != 2){
+            return 10;
+        }
+        int answer = 0;
+        if(cmds[1] == "width"){
+            answer = curFile.getInfoHeader().biWidth;
+        }else if(cmds[1] == "height"){
+            answer = curFile.getInfoHeader().biHeight;
+        }else{
+            return 11;
+        }
+        cout << cmds[1] << ": " << answer << endl;
+        return 0;
+    }
+    int analyseDraw(int wordCount, vector<string> cmds){
+        if(wordCount < 2){
+            return 10;
+        }
+        if(cmds[1] == "pixel"){
+            if(wordCount != 5){
+                return 10;
+            }
+            int x = stoi(cmds[2]);
+            int y = stoi(cmds[3]);
+            color color_set = analyseColor(cmds[4]);
+            if(x < 0 || x >= curFile.getInfoHeader().biHeight ||
+            y < 0 || y >= curFile.getInfoHeader().biWidth){
+                return 12;
+            }
+            curFile.editPixel(x, y, color_set);
+            return 0;
+        }else if(cmds[1] == "rect"){
+            if(wordCount != 7 && wordCount != 8 && wordCount != 9){
+                return 10;
+            }
+            int xf, yf, xl, yl, ptr;
+            color color_set;
+            if(cmds[2] != "filled" && cmds[2] != "unfilled"){
+                ptr = 2;
+            }else{
+                ptr = 3;
+            }
+            xf = stoi(cmds[ptr++]);
+            yf = stoi(cmds[ptr++]);
+            xl = stoi(cmds[ptr++]);
+            yl = stoi(cmds[ptr++]);
+            color_set = analyseColor(cmds[ptr++]);
+            if(xf < 0 || xf >= curFile.getInfoHeader().biHeight ||
+            xl < 0 || xl >= curFile.getInfoHeader().biHeight ||
+            yf < 0 || yf >= curFile.getInfoHeader().biWidth ||
+            yl < 0 || yl >= curFile.getInfoHeader().biWidth){
+                return 12;
+            }
+            if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
+                curFile.drawRect(xf, yf, xl, yl, color_set);
+            }else{
+                int borderPixelCount;
+                if(wordCount != 9){
+                    borderPixelCount = 1;
+                }else{
+                    borderPixelCount = stoi(cmds[8]);
+                }
+                curFile.drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
+            }
+            return 0;
+        }
+        return 11;
+    }
+    int analyseExit(int wordCount, vector<string> cmds){
+        if(wordCount != 1){
+            return 10;
+        }
+        bmpOpr::saveBMP();
+        exit(0);
+    }
+
+    void outPutError(int errCode){
+        if(errCode == 10){
+            cerr << "Wrong Format!" << endl;
+        }else if(errCode == 11){
+            cerr << "Unknown argument!" << endl;
+        }else if(errCode == 12){
+            cerr << "Pixel coordinates out of bounds!" << endl;
+        }else{
+            cerr << "Unknown Error!" << endl;
+        }
+    }
+
     void loopTime(){
         if(curFileName == ""){
             cout << "(No File)";
@@ -346,132 +482,25 @@ namespace cmdOpr{
         wordCount = cmds.size();
 
         // analyse commands
+        int res = 0;
         if(cmds[0] == "gen"){
-            if(wordCount != 4 && wordCount != 5){
-                cerr << "Wrong Format!" << endl;
-            }else{
-                string fileName = cmds[1];
-                int width = stoi(cmds[2]);
-                int height = stoi(cmds[3]);
-                color filling;
-                if(wordCount == 5){
-                    filling = analyseColor(cmds[4]);
-                }else{
-                    filling = color(255, 255, 255, 255);
-                }
-                bmpOpr::genBMP(width, height, filling, fileName);
-            }
+            res = analyseGen(wordCount, cmds);
         }else if(cmds[0] == "open"){
-            if(wordCount != 2){
-                cerr << "Wrong Format!" << endl;
-            }else{
-                bmpOpr::openBMP(cmds[1]);
-            }
+            res = analyseOpen(wordCount, cmds);
         }else if(cmds[0] == "save"){
-            if(wordCount != 1){
-                cerr << "Wrong Format!" << endl;
-            }else{
-                bmpOpr::saveBMP();
-            }
+            res = analyseSave(wordCount, cmds);
         }else if(cmds[0] == "set"){
-            if(wordCount != 3){
-                cerr << "Wrong Format!" << endl;
-            }else{
-                bool flagSuccess = true;
-                infoHeader ih = curFile.getInfoHeader();
-                if(cmds[1] == "width"){
-                    ih.biWidth = stoi(cmds[2]);
-                }else if(cmds[1] == "height"){
-                    ih.biHeight = stoi(cmds[2]);
-                }else{
-                    cerr << "Unknown argument!" << endl;
-                    flagSuccess = false;
-                }
-                if(flagSuccess){
-                    curFile.setInfoHeader(ih);
-                    bmpOpr::calcSetBMP();
-                }
-            }
+            res = analyseSet(wordCount, cmds);
         }else if(cmds[0] == "get"){
-            if(wordCount != 2){
-                cerr << "Wrong Format!" << endl;
-            }else{
-                bool flagSuccess = true;
-                int answer;
-                if(cmds[1] == "width"){
-                    answer = curFile.getInfoHeader().biWidth;
-                }else if(cmds[1] == "height"){
-                    answer = curFile.getInfoHeader().biHeight;
-                }else{
-                    cerr << "Unknown argument!" << endl;
-                    flagSuccess = false;
-                }
-                if(flagSuccess) cout << cmds[1] << ": " << answer << endl;
-            }
+            res = analyseGet(wordCount, cmds);
         }else if(cmds[0] == "draw"){
-            if(wordCount < 2){
-                cerr << "Wrong Format!" << endl;
-            }
-            if(cmds[1] == "pixel"){
-                if(wordCount != 5){
-                    cerr << "Wrong Format!" << endl;
-                }else{
-                    int x = stoi(cmds[2]);
-                    int y = stoi(cmds[3]);
-                    color color_set = analyseColor(cmds[4]);
-                    if(x < 0 || x >= curFile.getInfoHeader().biHeight ||
-                    y < 0 || y >= curFile.getInfoHeader().biWidth){
-                        cerr << "Pixel coordinates out of bounds!" << endl;
-                    }else{
-                        curFile.editPixel(x, y, color_set);
-                    }
-                }
-            }else if(cmds[1] == "rect"){
-                if(wordCount != 7 && wordCount != 8 && wordCount != 9){
-                    cerr << "Wrong Format!" << wordCount << endl;
-                }else{
-                    int xf, yf, xl, yl, ptr;
-                    color color_set;
-                    if(cmds[2] != "filled" && cmds[2] != "unfilled"){
-                        ptr = 2;
-                    }else{
-                        ptr = 3;
-                    }
-                    xf = stoi(cmds[ptr++]);
-                    yf = stoi(cmds[ptr++]);
-                    xl = stoi(cmds[ptr++]);
-                    yl = stoi(cmds[ptr++]);
-                    color_set = analyseColor(cmds[ptr++]);
-                    if(xf < 0 || xf >= curFile.getInfoHeader().biHeight ||
-                    xl < 0 || xl >= curFile.getInfoHeader().biHeight ||
-                    yf < 0 || yf >= curFile.getInfoHeader().biWidth ||
-                    yl < 0 || yl >= curFile.getInfoHeader().biWidth){
-                        cerr << "Pixel coordinates out of bounds!" << endl;
-                    }else{
-                        if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
-                            curFile.drawRect(xf, yf, xl, yl, color_set);
-                        }else{
-                            int borderPixelCount;
-                            if(wordCount != 9){
-                                borderPixelCount = 1;
-                            }else{
-                                borderPixelCount = stoi(cmds[8]);
-                            }
-                            curFile.drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
-                        }
-                    }
-                }
-            }
+            res = analyseDraw(wordCount, cmds);
         }else if(cmds[0] == "exit"){
-            if(wordCount != 1){
-                cerr << "Wrong Format!" << endl;
-            }else{
-                bmpOpr::saveBMP();
-                exit(0);
-            }
+            res = analyseExit(wordCount, cmds);
         }else{
             cerr << "Unknown Command!" << endl;
         }
+        outPutError(res);
     }
 }
 
