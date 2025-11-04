@@ -5,19 +5,19 @@
 ![GitHub issues](https://img.shields.io/github/issues/Haohao123coding/easy-bitmap-pixel-editor.svg)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/Haohao123coding/easy-bitmap-pixel-editor.svg)
 
-# EBPE - Easy Bitmap Pixel Editor
+# Easy Bitmap Pixel Editor
 
-EBPE 是一个极其轻量化的位图编辑软件，在窗口中输入命令来操作图片。
+EBPE is an extremely lightweight bitmap editor that lets you edit images by entering commands directly in the terminal.
 
-## 为什么有 EBPE？
+## Why EBPE？
 
-使用 Windows 自带的图片编辑器编辑像素会有很多不便，而一个轻量化的编辑软件则非常适合。
+Using the built-in image editor of an operating system can be quite inconvenient for editing pixels, whereas a lightweight editing software is much more suitable.
 
-## 实现方式
+## Implementation method
 
-使用 C++ 语言。
+Use C++ language (Standard: `C++ 14`).
 
-## 命令使用 / Command Usage
+## Command Usage
 
 | [中文](docs/use_command_zh-cn.md) | [English](docs/use_command_en-us.md) |
 
