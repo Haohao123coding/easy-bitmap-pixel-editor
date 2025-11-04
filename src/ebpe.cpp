@@ -75,6 +75,30 @@ public:
     void setFileHeader(fileHeader data){ fileh = data; }
     void setInfoHeader(infoHeader data){ infoh = data; }
     void setBmap(vector<vector<color>> data){ bmap = data; }
+    
+    void editPixel(int32_t x, int32_t y, color c){
+        // x, y is from zero
+        vector<vector<color>> bm = curFile.getBmap();
+        bm[x][y] = c;
+        curFile.setBmap(bm);
+    }
+    void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
+        // X first; X last; Y first; Y last
+        // x, y is from zero
+        for(int i = xf; i <= xl; i++){
+            for(int j = yf; j <= yl; j++){
+                editPixel(i, j, c);
+            }
+        }
+    }
+    void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount){
+        // X first; X last; Y first; Y last
+        // x, y is from zero
+        drawRect(xf, yf, xf + borderPixelCount - 1, yl, c);
+        drawRect(xf, yf, xl, yf + borderPixelCount - 1, c);
+        drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
+        drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
+    }
 };
 
 #pragma pack(pop) // Restore byte alignment
@@ -252,29 +276,6 @@ namespace bmpOpr{
         curFileName = fileName;
         saveBMP();
     }
-    void editPixel(int32_t x, int32_t y, color c){
-        // x, y is from zero
-        vector<vector<color>> bm = curFile.getBmap();
-        bm[x][y] = c;
-        curFile.setBmap(bm);
-    }
-    void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
-        // X first; X last; Y first; Y last
-        // x, y is from zero
-        for(int i = xf; i <= xl; i++){
-            for(int j = yf; j <= yl; j++){
-                editPixel(i, j, c);
-            }
-        }
-    }
-    void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount){
-        // X first; X last; Y first; Y last
-        // x, y is from zero
-        bmpOpr::drawRect(xf, yf, xf + borderPixelCount - 1, yl, c);
-        bmpOpr::drawRect(xf, yf, xl, yf + borderPixelCount - 1, c);
-        bmpOpr::drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
-        bmpOpr::drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
-    }
 }
 
 namespace cmdOpr{
@@ -422,7 +423,7 @@ namespace cmdOpr{
                     y < 0 || y >= curFile.getInfoHeader().biWidth){
                         cerr << "Pixel coordinates out of bounds!" << endl;
                     }else{
-                        bmpOpr::editPixel(x, y, color_set);
+                        curFile.editPixel(x, y, color_set);
                     }
                 }
             }else if(cmds[1] == "rect"){
@@ -448,7 +449,7 @@ namespace cmdOpr{
                         cerr << "Pixel coordinates out of bounds!" << endl;
                     }else{
                         if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
-                            bmpOpr::drawRect(xf, yf, xl, yl, color_set);
+                            curFile.drawRect(xf, yf, xl, yl, color_set);
                         }else{
                             int borderPixelCount;
                             if(wordCount != 9){
@@ -456,7 +457,7 @@ namespace cmdOpr{
                             }else{
                                 borderPixelCount = stoi(cmds[8]);
                             }
-                            bmpOpr::drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
+                            curFile.drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
                         }
                     }
                 }
