@@ -20,3 +20,21 @@ EBPE 是一个极其轻量化的位图编辑软件，在窗口中输入命令来
 ## 命令使用 / Command Usage
 
 | [中文](docs/use_command_zh-cn.md) | [English](docs/use_command_en-us.md) |
+
+# Code Of Conduct
+
+Please view Code of Conduct at <https://www.contributor-covenant.org/version/2/1/code_of_conduct/>.
+
+# Security Policy
+
+## Supported Versions
+
+Any versions.
+
+## Reporting a Vulnerability
+
+If you've found a security vulnerability in EBPE project, please do not create an issue on
+the GitHub issue tracker as it will be visible publicly.
+
+Instead, send an email to <18217288892@163.com>, subject: `EBPE Security`.
+
