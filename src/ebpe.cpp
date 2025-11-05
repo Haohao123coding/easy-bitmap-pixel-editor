@@ -4,106 +4,10 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+
+#include "bmpFile.h"
+
 using namespace std;
-
-struct color{
-    uint16_t bit; // 24 or 32
-    uint8_t r, g, b, a;
-    color(){
-        bit = 24;
-        r = 0; g = 0; b = 0; a = 0;
-    }
-    color(uint8_t x, uint8_t y, uint8_t z){
-        bit = 24; a = 0;
-        r = x; g = y; b = z;
-    }
-    color(uint8_t x, uint8_t y, uint8_t z, uint8_t t){
-        bit = 32;
-        r = x; g = y; b = z; a = t;
-    }
-};
-
-#pragma pack(push, 1) // Disable byte alignment
-
-struct fileHeader{
-    uint16_t bfType = 0x4D42;
-    uint32_t bfSize = 0;
-    uint16_t bfReserved1 = 0;
-    uint16_t bfReserved2 = 0;
-    uint32_t bfOffBits = 54;
-};
-
-struct infoHeader{
-    uint32_t biSize = 40;
-    int32_t biWidth = 0;
-    int32_t biHeight = 0;
-    uint16_t biPlanes = 1;
-    uint16_t biBitCount = 24;
-    uint32_t biCompression = 0;
-    uint32_t biSizeImage = 0;
-    int32_t biXPixelsPerMeter = 0;
-    int32_t biYPixelsPerMeter = 0;
-    uint32_t biClrUsed = 0;
-    uint32_t biClrImportant = 0;
-    infoHeader() = default;
-    infoHeader(int32_t width, int32_t height, bool hasAlpha){
-        biWidth = width;
-        biHeight = height;
-        if(hasAlpha) biBitCount = 32;
-        else biBitCount = 24;
-    }
-};
-
-class bmpFile{
-private:
-    fileHeader fileh;
-    infoHeader infoh;
-    vector<vector<color>> bmap;
-public:
-    bmpFile() = default;
-    bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
-        infoh = infoHeader(bWidth, bHeight, bHasAlpha);
-
-        // setup vectors
-        bmap.resize(bHeight);
-        for(int32_t i = 0; i < bHeight; i++){
-            bmap[i].resize(bWidth);
-        }
-    }
-
-    fileHeader getFileHeader(){ return fileh; }
-    infoHeader getInfoHeader(){ return infoh; }
-    vector<vector<color>> getBmap(){ return bmap; }
-    void setFileHeader(const fileHeader& data){ fileh = data; }
-    void setInfoHeader(const infoHeader& data){ infoh = data; }
-    void setBmap(vector<vector<color>> data){ bmap = std::move(data); }
-    
-    void editPixel(int32_t x, int32_t y, color c){
-        // x, y is from zero
-        vector<vector<color>> bm = getBmap();
-        bm[x][y] = c;
-        setBmap(bm);
-    }
-    void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
-        // X first; X last; Y first; Y last
-        // x, y is from zero
-        for(int32_t i = xf; i <= xl; i++){
-            for(int32_t j = yf; j <= yl; j++){
-                editPixel(i, j, c);
-            }
-        }
-    }
-    void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount){
-        // X first; X last; Y first; Y last
-        // x, y is from zero
-        drawRect(xf, yf, xf + borderPixelCount - 1, yl, c);
-        drawRect(xf, yf, xl, yf + borderPixelCount - 1, c);
-        drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
-        drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
-    }
-};
-
-#pragma pack(pop) // Restore byte alignment
 
 bmpFile curFile;
 string curFileName;
