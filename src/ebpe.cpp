@@ -1,9 +1,9 @@
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 #include <utility>
-#include<vector>
-#include<cstdint>
-#include<string>
+#include <vector>
+#include <cstdint>
+#include <string>
 using namespace std;
 
 struct color{
