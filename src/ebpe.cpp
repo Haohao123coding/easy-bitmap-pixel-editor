@@ -1,18 +1,20 @@
 #include<iostream>
 #include<fstream>
+#include <utility>
 #include<vector>
 #include<cstdint>
-#include<ctime>
-#include<cstdlib>
 #include<string>
 using namespace std;
 
 struct color{
     uint16_t bit; // 24 or 32
     uint8_t r, g, b, a;
-    color(){}
-    color(uint8_t x, uint8_t y, uint8_t z){
+    color(){
         bit = 24;
+        r = 0; g = 0; b = 0; a = 0;
+    }
+    color(uint8_t x, uint8_t y, uint8_t z){
+        bit = 24; a = 0;
         r = x; g = y; b = z;
     }
     color(uint8_t x, uint8_t y, uint8_t z, uint8_t t){
@@ -39,11 +41,11 @@ struct infoHeader{
     uint16_t biBitCount = 24;
     uint32_t biCompression = 0;
     uint32_t biSizeImage = 0;
-    int32_t biXPelsPerMeter = 0;
-    int32_t biYPelsPerMeter = 0;
+    int32_t biXPixelsPerMeter = 0;
+    int32_t biYPixelsPerMeter = 0;
     uint32_t biClrUsed = 0;
     uint32_t biClrImportant = 0;
-    infoHeader(){}
+    infoHeader() = default;
     infoHeader(int32_t width, int32_t height, bool hasAlpha){
         biWidth = width;
         biHeight = height;
@@ -58,7 +60,7 @@ private:
     infoHeader infoh;
     vector<vector<color>> bmap;
 public:
-    bmpFile(){}
+    bmpFile() = default;
     bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
         infoh = infoHeader(bWidth, bHeight, bHasAlpha);
 
@@ -72,15 +74,15 @@ public:
     fileHeader getFileHeader(){ return fileh; }
     infoHeader getInfoHeader(){ return infoh; }
     vector<vector<color>> getBmap(){ return bmap; }
-    void setFileHeader(fileHeader data){ fileh = data; }
-    void setInfoHeader(infoHeader data){ infoh = data; }
-    void setBmap(vector<vector<color>> data){ bmap = data; }
+    void setFileHeader(const fileHeader& data){ fileh = data; }
+    void setInfoHeader(const infoHeader& data){ infoh = data; }
+    void setBmap(vector<vector<color>> data){ bmap = std::move(data); }
     
     void editPixel(int32_t x, int32_t y, color c){
         // x, y is from zero
-        vector<vector<color>> bm = curFile.getBmap();
+        vector<vector<color>> bm = getBmap();
         bm[x][y] = c;
-        curFile.setBmap(bm);
+        setBmap(bm);
     }
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
         // X first; X last; Y first; Y last
@@ -107,7 +109,7 @@ bmpFile curFile;
 string curFileName;
 
 namespace bmpOpr{
-    void openBMP(string fileName){
+    void openBMP(const string& fileName){
         // open file
         ifstream file(fileName, ios::binary);
         if(!file.is_open()){
@@ -116,8 +118,10 @@ namespace bmpOpr{
         }
 
         // read headers
-        file.read(reinterpret_cast<char*>(&curFile.getFileHeader()), sizeof(fileHeader));
-        file.read(reinterpret_cast<char*>(&curFile.getInfoHeader()), sizeof(infoHeader));
+        fileHeader fh = curFile.getFileHeader();
+        infoHeader ih = curFile.getInfoHeader();
+        file.read(reinterpret_cast<char*>(&fh), sizeof(fileHeader));
+        file.read(reinterpret_cast<char*>(&ih), sizeof(infoHeader));
 
         // check
         if(curFile.getFileHeader().bfType != 0x4D42){
@@ -138,8 +142,8 @@ namespace bmpOpr{
                 curFile.getInfoHeader().biBitCount != 32
             ) ||
             curFile.getInfoHeader().biCompression != 0 ||
-            curFile.getInfoHeader().biXPelsPerMeter != 0 ||
-            curFile.getInfoHeader().biYPelsPerMeter != 0 ||
+            curFile.getInfoHeader().biXPixelsPerMeter != 0 ||
+            curFile.getInfoHeader().biYPixelsPerMeter != 0 ||
             curFile.getInfoHeader().biClrUsed != 0 ||
             curFile.getInfoHeader().biClrImportant != 0
         ){ cerr << "No Support For This Format!"; return; }
@@ -147,7 +151,7 @@ namespace bmpOpr{
         // calc
         int32_t width = curFile.getInfoHeader().biWidth;
         int32_t height = curFile.getInfoHeader().biHeight;
-        int16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
+        uint16_t colorByte = ih.biBitCount / 8;
         int32_t rowSize = (width * colorByte + 3) / 4 * 4;
         int32_t paddingSize = rowSize - width * colorByte;
 
@@ -182,7 +186,7 @@ namespace bmpOpr{
         // calc
         int32_t width = curFile.getInfoHeader().biWidth;
         int32_t height = curFile.getInfoHeader().biHeight;
-        int16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
+        uint16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
         int32_t rowSize = (width * colorByte + 3) / 4 * 4;
 
         // set headers
@@ -207,7 +211,7 @@ namespace bmpOpr{
         // calc
         int32_t width = curFile.getInfoHeader().biWidth;
         int32_t height = curFile.getInfoHeader().biHeight;
-        int16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
+        uint16_t colorByte = curFile.getInfoHeader().biBitCount / 8;
         int32_t rowSize = (width * colorByte + 3) / 4 * 4;
         int32_t paddingSize = rowSize - width * colorByte;
 
@@ -215,8 +219,10 @@ namespace bmpOpr{
         calcSetBMP();
 
         // write headers
-        file.write(reinterpret_cast<const char*>(&curFile.getFileHeader()), sizeof(fileHeader));
-        file.write(reinterpret_cast<const char*>(&curFile.getInfoHeader()), sizeof(infoHeader));
+        fileHeader fh = curFile.getFileHeader();
+        infoHeader ih = curFile.getInfoHeader();
+        file.write(reinterpret_cast<char*>(&fh), sizeof(fileHeader));
+        file.write(reinterpret_cast<char*>(&ih), sizeof(infoHeader));
 
         // setup vectors
         vector<vector<color>> bm;
@@ -245,7 +251,7 @@ namespace bmpOpr{
     void genBMP(int32_t width, int32_t height, color filling, string fileName){
         // calc
         bmpFile newFile;
-        int16_t colorByte = filling.bit / 8;
+        uint16_t colorByte = filling.bit / 8;
         int32_t rowSize = (width * colorByte + 3) / 4 * 4;
 
         // setup file header and info header
@@ -263,9 +269,11 @@ namespace bmpOpr{
         // setup pixels
         vector<vector<color>> bm;
         vector<color> tmp;
+        tmp.reserve(width);
         for(int32_t i = 0; i < width; i++){
             tmp.push_back(filling);
         }
+        bm.reserve(height);
         for(int32_t i = 0; i < height; i++){
             bm.push_back(tmp);
         }
@@ -273,7 +281,7 @@ namespace bmpOpr{
 
         // save file
         curFile = newFile;
-        curFileName = fileName;
+        curFileName = std::move(fileName);
         saveBMP();
     }
 }
@@ -295,7 +303,7 @@ namespace cmdOpr{
     }
     color analyseColor(string str){
         int32_t colorByte;
-        int32_t len = str.length();
+        uint32_t len = str.length();
         if(len == 7){
             colorByte = 3;
         }else{
@@ -312,23 +320,23 @@ namespace cmdOpr{
                 return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
             }
         }
-        int16_t r = hex_2_to_dec(str.substr(1, 2));
-        int16_t g = hex_2_to_dec(str.substr(3, 2));
-        int16_t b = hex_2_to_dec(str.substr(5, 2));
-        int16_t a;
-        if(colorByte == 4) a = hex_2_to_dec(str.substr(7, 2));
+        uint8_t r = static_cast<uint8_t>(hex_2_to_dec(str.substr(1, 2)));
+        uint8_t g = static_cast<uint8_t>(hex_2_to_dec(str.substr(3, 2)));
+        uint8_t b = static_cast<uint8_t>(hex_2_to_dec(str.substr(5, 2)));
+        uint8_t a = 0;
+        if(colorByte == 4) a = static_cast<uint8_t>(hex_2_to_dec(str.substr(7, 2)));
         if(colorByte == 3){
-            return color(r, g, b);
+            return {r, g, b};
         }else{
-            return color(r, g, b, a);
+            return {r, g, b, a};
         }
     }
 
-    int32_t analyseGen(int32_t wordCount, vector<string> cmds){
+    int32_t analyseGen(uint32_t wordCount, vector<string> cmds){
         if(wordCount != 4 && wordCount != 5){
             return 10;
         }
-        string fileName = cmds[1];
+        const string& fileName = cmds[1];
         int32_t width = stoi(cmds[2]);
         int32_t height = stoi(cmds[3]);
         color filling;
@@ -340,21 +348,21 @@ namespace cmdOpr{
         bmpOpr::genBMP(width, height, filling, fileName);
         return 0;
     }
-    int32_t analyseOpen(int32_t wordCount, vector<string> cmds){
+    int32_t analyseOpen(uint32_t wordCount, const vector<string>& cmds){
         if(wordCount != 2){
             return 10;
         }
         bmpOpr::openBMP(cmds[1]);
         return 0;
     }
-    int32_t analyseSave(int32_t wordCount, vector<string> cmds){
+    int32_t analyseSave(uint32_t wordCount, const vector<string>& cmds){
         if(wordCount != 1){
             return 10;
         }
         bmpOpr::saveBMP();
         return 0;
     }
-    int32_t analyseSet(int32_t wordCount, vector<string> cmds){
+    int32_t analyseSet(uint32_t wordCount, const vector<string>& cmds){
         if(wordCount != 3){
             return 10;
         }
@@ -370,7 +378,7 @@ namespace cmdOpr{
         bmpOpr::calcSetBMP();
         return 0;
     }
-    int32_t analyseGet(int32_t wordCount, vector<string> cmds){
+    int32_t analyseGet(uint32_t wordCount, const vector<string>& cmds){
         if(wordCount != 2){
             return 10;
         }
@@ -385,7 +393,7 @@ namespace cmdOpr{
         cout << cmds[1] << ": " << answer << endl;
         return 0;
     }
-    int32_t analyseDraw(int32_t wordCount, vector<string> cmds){
+    int32_t analyseDraw(uint32_t wordCount, const vector<string>& cmds){
         if(wordCount < 2){
             return 10;
         }
@@ -439,7 +447,7 @@ namespace cmdOpr{
         }
         return 11;
     }
-    int32_t analyseExit(int32_t wordCount, vector<string> cmds){
+    int32_t analyseExit(uint32_t wordCount, const vector<string>& cmds){
         if(wordCount != 1){
             return 10;
         }
@@ -460,18 +468,18 @@ namespace cmdOpr{
     }
 
     void loopTime(){
-        if(curFileName == ""){
+        if(curFileName.empty()){
             cout << "(No File)";
         }
         cout << curFileName << '>';
 
         // read commands
-        string cmd, tmp = "";
+        string cmd, tmp;
         vector<string> cmds;
         getline(cin, cmd);
         cmd += ' '; // add a space
-        int32_t len = cmd.length(), wordCount = 0;
-        for(int32_t i = 0; i < len; i++){
+        uint32_t len = cmd.length(), wordCount = 0;
+        for(uint32_t i = 0; i < len; i++){
             if(cmd[i] == ' '){
                 cmds.push_back(tmp);
                 tmp = "";
