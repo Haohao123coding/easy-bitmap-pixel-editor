@@ -50,7 +50,7 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, string fileName){
     ih.biBitCount = filling.bit;
     ih.biSizeImage = rowSize * height;
     fh.bfSize =
-    sizeof(fh) + sizeof(ih) + infoh.biSizeImage;
+    sizeof(fh) + sizeof(ih) + ih.biSizeImage;
     fileh = fh;
     infoh = ih;
 
@@ -217,12 +217,10 @@ void bmpFile::saveBMP(){
     file.write(reinterpret_cast<char*>(&ih), sizeof(infoHeader));
 
     // setup vectors
-    vector<vector<color>> bm;
-    bm.resize(height);
+    bmap.resize(height);
     for(int32_t i = 0; i < height; i++){
-        bm[i].resize(width);
+        bmap[i].resize(width);
     }
-    bmap = bm;
 
     // write pixels
     for(int32_t i = height - 1; i >= 0; i--){

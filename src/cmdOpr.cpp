@@ -8,7 +8,6 @@
 #include "cmdOpr.h"
 
 bmpFile curFile;
-string curFileName;
 
 int32_t cmdOpr::hex_to_dec(char hex){
     if(hex >= '0' && hex <= '9'){
@@ -192,10 +191,10 @@ void cmdOpr::outPutError(int32_t errCode){
 }
 
 void cmdOpr::loopTime(){
-    if(curFileName.empty()){
+    if(curFile.getCurFileName().empty()){
         cout << "(No File)";
     }
-    cout << curFileName << '>';
+    cout << curFile.getCurFileName() << '>';
 
     // read commands
     string cmd, tmp;

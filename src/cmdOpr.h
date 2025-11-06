@@ -5,7 +5,6 @@
 #include "bmpFile.h"
 
 extern bmpFile curFile;
-extern string curFileName;
 
 namespace cmdOpr{
     // utils:
