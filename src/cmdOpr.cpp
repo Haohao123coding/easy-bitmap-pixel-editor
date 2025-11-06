@@ -179,6 +179,7 @@ int32_t cmdOpr::analyseExit(uint32_t wordCount, const vector<string>& cmds){
 }
 
 void cmdOpr::outPutError(int32_t errCode){
+    if(errCode == 0){ return; }
     if(errCode == 10){
         cerr << "Wrong Format!" << endl;
     }else if(errCode == 11){
