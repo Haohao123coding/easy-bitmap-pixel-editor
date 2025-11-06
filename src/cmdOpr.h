@@ -1,8 +1,11 @@
 #ifndef EASY_BITMAP_PIXEL_EDITOR_CMDOPR_H
 #define EASY_BITMAP_PIXEL_EDITOR_CMDOPR_H
 
-bmpFile curFile;
-string curFileName;
+#include <string>
+#include "bmpFile.h"
+
+extern bmpFile curFile;
+extern string curFileName;
 
 namespace cmdOpr{
     // utils:

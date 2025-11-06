@@ -7,6 +7,9 @@
 #include "bmpFile.h"
 #include "cmdOpr.h"
 
+bmpFile curFile;
+string curFileName;
+
 int32_t cmdOpr::hex_to_dec(char hex){
     if(hex >= '0' && hex <= '9'){
         return hex - '0';
