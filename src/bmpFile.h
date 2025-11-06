@@ -2,6 +2,7 @@
 #define EASY_BITMAP_PIXEL_EDITOR_BMPFILE_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -45,20 +46,28 @@ private:
     fileHeader fileh;
     infoHeader infoh;
     vector<vector<color>> bmap;
+    string curFileName;
 public:
     bmpFile();
     bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha);
+    bmpFile(int32_t width, int32_t height, color filling, string fileName);
 
     fileHeader getFileHeader();
     infoHeader getInfoHeader();
     vector<vector<color>> getBmap();
+    string getCurFileName();
     void setFileHeader(const fileHeader& data);
     void setInfoHeader(const infoHeader& data);
     void setBmap(vector<vector<color>> data);
+    void setCurFileName(const string& fileName);
     
     void editPixel(int32_t x, int32_t y, color c);
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c);
     void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount);
+
+    void openBMP(const string& fileName);
+    void calcSetBMP();
+    void saveBMP();
 };
 
 #pragma pack(pop) // Restore byte alignment
