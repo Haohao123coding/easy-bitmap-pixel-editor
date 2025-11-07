@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 struct color{
     uint16_t bit; // 24 or 32
     uint8_t r, g, b, a;
@@ -49,27 +47,27 @@ class bmpFile{
 private:
     fileHeader fileh;
     infoHeader infoh;
-    vector<vector<color>> bmap;
-    string curFileName;
+    std::vector<std::vector<color>> bmap;
+    std::string curFileName;
 public:
     bmpFile();
     bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha);
-    bmpFile(int32_t width, int32_t height, color filling, string fileName);
+    bmpFile(int32_t width, int32_t height, color filling, std::string fileName);
 
     fileHeader getFileHeader();
     infoHeader getInfoHeader();
-    vector<vector<color>> getBmap();
-    string getCurFileName();
+    std::vector<std::vector<color>> getBmap();
+    std::string getCurFileName();
     void setFileHeader(const fileHeader& data);
     void setInfoHeader(const infoHeader& data);
-    void setBmap(vector<vector<color>> data);
-    void setCurFileName(const string& fileName);
+    void setBmap(std::vector<std::vector<color>> data);
+    void setCurFileName(const std::string& fileName);
     
     void editPixel(int32_t x, int32_t y, color c);
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c);
     void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount);
 
-    void openBMP(const string& fileName);
+    void openBMP(const std::string& fileName);
     void calcSetBMP();
     void saveBMP();
 };
