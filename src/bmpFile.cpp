@@ -1,10 +1,12 @@
+// *** EBPE ***
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 Haohao123coding
+
 #include <iostream>
 #include <fstream>
 #include <utility>
 
 #include "bmpFile.h"
-
-using namespace std;
 
 color::color(){
     bit = 24;
@@ -37,7 +39,7 @@ bmpFile::bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
         bmap[i].resize(bWidth);
     }
 }
-bmpFile::bmpFile(int32_t width, int32_t height, color filling, string fileName){
+bmpFile::bmpFile(int32_t width, int32_t height, color filling, std::string fileName){
     // calc
     uint16_t colorByte = filling.bit / 8;
     int32_t rowSize = (width * colorByte + 3) / 4 * 4;
@@ -55,8 +57,8 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, string fileName){
     infoh = ih;
 
     // setup pixels
-    vector<vector<color>> bm;
-    vector<color> tmp;
+    std::vector<std::vector<color>> bm;
+    std::vector<color> tmp;
     tmp.reserve(width);
     for(int32_t i = 0; i < width; i++){
         tmp.push_back(filling);
@@ -75,17 +77,17 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, string fileName){
 
 fileHeader bmpFile::getFileHeader(){ return fileh; }
 infoHeader bmpFile::getInfoHeader(){ return infoh; }
-vector<vector<color>> bmpFile::getBmap(){ return bmap; }
-string bmpFile::getCurFileName(){ return curFileName; }
+std::vector<std::vector<color>> bmpFile::getBmap(){ return bmap; }
+std::string bmpFile::getCurFileName(){ return curFileName; }
 
 void bmpFile::setFileHeader(const fileHeader& data){ fileh = data; }
 void bmpFile::setInfoHeader(const infoHeader& data){ infoh = data; }
-void bmpFile::setBmap(vector<vector<color>> data){ bmap = std::move(data); }
-void bmpFile::setCurFileName(const string& fileName){ curFileName = fileName; }
+void bmpFile::setBmap(std::vector<std::vector<color>> data){ bmap = std::move(data); }
+void bmpFile::setCurFileName(const std::string& fileName){ curFileName = fileName; }
 
 void bmpFile::editPixel(int32_t x, int32_t y, color c){
     // x, y is from zero
-    vector<vector<color>> bm = getBmap();
+    std::vector<std::vector<color>> bm = getBmap();
     bm[x][y] = c;
     setBmap(bm);
 }
@@ -106,11 +108,11 @@ void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, c
     drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
     drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
 }
-void bmpFile::openBMP(const string& fileName){
+void bmpFile::openBMP(const std::string& fileName){
     // open file
-    ifstream file(fileName, ios::binary);
+    std::ifstream file(fileName, std::ios::binary);
     if(!file.is_open()){
-        cerr << "No file!" << endl;
+        std::cerr << "No file!" << std::endl;
         return;
     }
 
@@ -120,13 +122,13 @@ void bmpFile::openBMP(const string& fileName){
 
     // check
     if(fileh.bfType != 0x4D42){
-        cerr << "Not BMP file!" << endl;
+        std::cerr << "Not BMP file!" << std::endl;
     }
     if(
         fileh.bfReserved1 != 0 ||
         fileh.bfReserved2 != 0 ||
         fileh.bfOffBits != 54
-    ){ cerr << "No Support For This Format!"; return; }
+    ){ std::cerr << "No Support For This Format!"; return; }
     if(
         infoh.biSize != 40 ||
         infoh.biWidth < 0 ||
@@ -141,7 +143,7 @@ void bmpFile::openBMP(const string& fileName){
         infoh.biYPixelsPerMeter != 0 ||
         infoh.biClrUsed != 0 ||
         infoh.biClrImportant != 0
-    ){ cerr << "No Support For This Format!"; return; }
+    ){ std::cerr << "No Support For This Format!"; return; }
 
     // calc
     int32_t width = infoh.biWidth;
@@ -150,8 +152,8 @@ void bmpFile::openBMP(const string& fileName){
     int32_t rowSize = (width * colorByte + 3) / 4 * 4;
     int32_t paddingSize = rowSize - width * colorByte;
 
-    // setup vectors
-    vector<vector<color>> bm;
+    // setup std::vectors
+    std::vector<std::vector<color>> bm;
     bm.resize(height);
     for(int32_t i = 0; i < height; i++){
         bm[i].resize(width);
@@ -171,7 +173,7 @@ void bmpFile::openBMP(const string& fileName){
                 bmap[i][j].bit = 24;
             }
         }
-        file.seekg(paddingSize, ios::cur);
+        file.seekg(paddingSize, std::ios::cur);
     }
 
     // misc
@@ -194,9 +196,9 @@ void bmpFile::calcSetBMP(){
 
 void bmpFile::saveBMP(){
     // open file
-    ofstream file(curFileName, ios::binary);
+    std::ofstream file(curFileName, std::ios::binary);
     if(!file.is_open()){
-        cerr << "No file!" << endl;
+        std::cerr << "No file!" << std::endl;
         return;
     }
 
@@ -216,7 +218,7 @@ void bmpFile::saveBMP(){
     file.write(reinterpret_cast<char*>(&fh), sizeof(fileHeader));
     file.write(reinterpret_cast<char*>(&ih), sizeof(infoHeader));
 
-    // setup vectors
+    // setup std::vectors
     bmap.resize(height);
     for(int32_t i = 0; i < height; i++){
         bmap[i].resize(width);

@@ -1,3 +1,7 @@
+// *** EBPE ***
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 Haohao123coding
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -20,10 +24,10 @@ int32_t cmdOpr::hex_to_dec(char hex){
         return 0;
     }
 }
-int32_t cmdOpr::hex_2_to_dec(string hex){
+int32_t cmdOpr::hex_2_to_dec(std::string hex){
     return hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]);
 }
-color cmdOpr::analyseColor(string str){
+color cmdOpr::analyseColor(std::string str){
     int32_t colorByte;
     uint32_t len = str.length();
     if(len == 7){
@@ -54,11 +58,11 @@ color cmdOpr::analyseColor(string str){
     }
 }
 
-int32_t cmdOpr::analyseGen(uint32_t wordCount, vector<string> cmds){
+int32_t cmdOpr::analyseGen(uint32_t wordCount, std::vector<std::string> cmds){
     if(wordCount != 4 && wordCount != 5){
         return 10;
     }
-    const string& fileName = cmds[1];
+    const std::string& fileName = cmds[1];
     int32_t width = stoi(cmds[2]);
     int32_t height = stoi(cmds[3]);
     color filling;
@@ -70,21 +74,21 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, vector<string> cmds){
     curFile = bmpFile(width, height, filling, fileName);
     return 0;
 }
-int32_t cmdOpr::analyseOpen(uint32_t wordCount, const vector<string>& cmds){
+int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 2){
         return 10;
     }
     curFile.openBMP(cmds[1]);
     return 0;
 }
-int32_t cmdOpr::analyseSave(uint32_t wordCount, const vector<string>& cmds){
+int32_t cmdOpr::analyseSave(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 1){
         return 10;
     }
     curFile.saveBMP();
     return 0;
 }
-int32_t cmdOpr::analyseSet(uint32_t wordCount, const vector<string>& cmds){
+int32_t cmdOpr::analyseSet(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 3){
         return 10;
     }
@@ -100,7 +104,7 @@ int32_t cmdOpr::analyseSet(uint32_t wordCount, const vector<string>& cmds){
     curFile.calcSetBMP();
     return 0;
 }
-int32_t cmdOpr::analyseGet(uint32_t wordCount, const vector<string>& cmds){
+int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 2){
         return 10;
     }
@@ -112,10 +116,10 @@ int32_t cmdOpr::analyseGet(uint32_t wordCount, const vector<string>& cmds){
     }else{
         return 11;
     }
-    cout << cmds[1] << ": " << answer << endl;
+    std::cout << cmds[1] << ": " << answer << std::endl;
     return 0;
 }
-int32_t cmdOpr::analyseDraw(uint32_t wordCount, const vector<string>& cmds){
+int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount < 2){
         return 10;
     }
@@ -169,7 +173,7 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const vector<string>& cmds){
     }
     return 11;
 }
-int32_t cmdOpr::analyseExit(uint32_t wordCount, const vector<string>& cmds){
+int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 1){
         return 10;
     }
@@ -180,26 +184,26 @@ int32_t cmdOpr::analyseExit(uint32_t wordCount, const vector<string>& cmds){
 void cmdOpr::outPutError(int32_t errCode){
     if(errCode == 0){ return; }
     if(errCode == 10){
-        cerr << "Wrong Format!" << endl;
+        std::cerr << "Wrong Format!" << std::endl;
     }else if(errCode == 11){
-        cerr << "Unknown argument!" << endl;
+        std::cerr << "Unknown argument!" << std::endl;
     }else if(errCode == 12){
-        cerr << "Pixel coordinates out of bounds!" << endl;
+        std::cerr << "Pixel coordinates out of bounds!" << std::endl;
     }else{
-        cerr << "Unknown Error!" << endl;
+        std::cerr << "Unknown Error!" << std::endl;
     }
 }
 
 void cmdOpr::loopTime(){
     if(curFile.getCurFileName().empty()){
-        cout << "(No File)";
+        std::cout << "(No File)";
     }
-    cout << curFile.getCurFileName() << '>';
+    std::cout << curFile.getCurFileName() << '>';
 
     // read commands
-    string cmd, tmp;
-    vector<string> cmds;
-    getline(cin, cmd);
+    std::string cmd, tmp;
+    std::vector<std::string> cmds;
+    getline(std::cin, cmd);
     cmd += ' '; // add a space
     uint32_t len = cmd.length(), wordCount = 0;
     for(uint32_t i = 0; i < len; i++){
@@ -229,7 +233,7 @@ void cmdOpr::loopTime(){
     }else if(cmds[0] == "exit"){
         res = analyseExit(wordCount, cmds);
     }else{
-        cerr << "Unknown Command!" << endl;
+        std::cerr << "Unknown Command!" << std::endl;
     }
     outPutError(res);
 }
