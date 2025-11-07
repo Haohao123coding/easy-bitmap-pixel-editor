@@ -1,3 +1,7 @@
+// *** EBPE ***
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 Haohao123coding
+
 #ifndef EASY_BITMAP_PIXEL_EDITOR_BMPFILE_H
 #define EASY_BITMAP_PIXEL_EDITOR_BMPFILE_H
 

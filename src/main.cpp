@@ -1,3 +1,7 @@
+// *** EBPE ***
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 Haohao123coding
+
 #include "cmdOpr.h"
 
 int main(){
