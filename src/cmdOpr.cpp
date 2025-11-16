@@ -137,36 +137,24 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         curFile.editPixel(x, y, color_set);
         return 0;
     }else if(cmds[1] == "rect"){
-        if(wordCount != 7 && wordCount != 8 && wordCount != 9){
+        if(wordCount != 7 && wordCount != 8){
             return 10;
         }
-        int32_t xf, yf, xl, yl, ptr;
-        color color_set;
-        if(cmds[2] != "filled" && cmds[2] != "unfilled"){
-            ptr = 2;
-        }else{
-            ptr = 3;
-        }
-        xf = stoi(cmds[ptr++]);
-        yf = stoi(cmds[ptr++]);
-        xl = stoi(cmds[ptr++]);
-        yl = stoi(cmds[ptr++]);
-        color_set = analyseColor(cmds[ptr++]);
+        int32_t xf = stoi(cmds[2]);
+        int32_t yf = stoi(cmds[3]);
+        int32_t xl = stoi(cmds[4]);
+        int32_t yl = stoi(cmds[5]);
+        color color_set = analyseColor(cmds[6]);
         if(xf < 0 || xf >= curFile.getInfoHeader().biHeight ||
         xl < 0 || xl >= curFile.getInfoHeader().biHeight ||
         yf < 0 || yf >= curFile.getInfoHeader().biWidth ||
         yl < 0 || yl >= curFile.getInfoHeader().biWidth){
             return 12;
         }
-        if(wordCount == 7 || (wordCount == 8 && cmds[2] == "filled")){
+        if(wordCount == 7){
             curFile.drawRect(xf, yf, xl, yl, color_set);
         }else{
-            int32_t borderPixelCount;
-            if(wordCount != 9){
-                borderPixelCount = 1;
-            }else{
-                borderPixelCount = stoi(cmds[8]);
-            }
+            int32_t borderPixelCount = stoi(cmds[7]);
             curFile.drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
         }
         return 0;
