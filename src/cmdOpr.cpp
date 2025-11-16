@@ -154,7 +154,7 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         if(wordCount == 7){
             curFile.drawRect(xf, yf, xl, yl, color_set);
         }else{
-            int32_t borderPixelCount = stoi(cmds[8]);
+            int32_t borderPixelCount = stoi(cmds[7]);
             curFile.drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
         }
         return 0;
