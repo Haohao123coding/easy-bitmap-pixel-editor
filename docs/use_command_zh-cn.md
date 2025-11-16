@@ -77,3 +77,10 @@
     - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color> <borderPixelCount>`
     
     用 `color` 绘制矩形。`borderPixelCount` 表示线段宽度，边框的最外层在原本（四个角）的位置。若无 `borderPixelCount` 则绘制填充矩形。
+
+### help
+
+用法：
+- `help <command>`
+
+输出 `<command>` 的用法。
