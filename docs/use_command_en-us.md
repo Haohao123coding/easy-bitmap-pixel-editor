@@ -76,8 +76,6 @@ Coordinates start from 0. If coordinates are out of bounds, output `Pixel coordi
     
     Usage:
     - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color>`
-    - `draw rect filled <xFirst> <yFirst> <xLast> <yLast> <color>`
-    - `draw rect unfilled <xFirst> <yFirst> <xLast> <yLast> <color>`
-    - `draw rect unfilled <borderPixelCount> <xFirst> <yFirst> <xLast> <yLast> <color>`
+    - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color> <borderPixelCount>`
     
-    Draw a rectangle using `color`. `filled` means filled rectangle, `unfilled` means unfilled (border only, with `borderPixelCount` specifying the line width - the outermost edge remains at the original position, default is `1`). Default is filled.
+    Draw a rectangle using `color`. `borderPixelCount` means the line width, the outermost edge remains at the original position (four angles). If no `borderPixelCount`, draw filled rectangle.

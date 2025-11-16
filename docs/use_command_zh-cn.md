@@ -74,8 +74,6 @@
     
     用法：
     - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color>`
-    - `draw rect filled <xFirst> <yFirst> <xLast> <yLast> <color>`
-    - `draw rect unfilled <xFirst> <yFirst> <xLast> <yLast> <color>`
-    - `draw rect unfilled <xFirst> <yFirst> <xLast> <yLast> <color> <borderPixelCount>`
+    - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color> <borderPixelCount>`
     
-    用 `color` 绘制矩形。`filled` 表示填充，`unfilled` 表示不填充（`borderPixelCount` 的线段宽度，最外层在原本的位置，默认为 `1`）。默认为填充。
+    用 `color` 绘制矩形。`borderPixelCount` 表示线段宽度，边框的最外层在原本（四个角）的位置。若无 `borderPixelCount` 则绘制填充矩形。
