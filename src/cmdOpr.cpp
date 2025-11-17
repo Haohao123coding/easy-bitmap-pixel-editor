@@ -4,9 +4,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <cstdint>
-#include <string>
 
 #include "bmpFile.h"
 #include "cmdOpr.h"
@@ -20,8 +17,10 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, std::vector<std::string> cmds){
         return 10;
     }
     const std::string& fileName = cmds[1];
-    int32_t width = utils::stringToUint(cmds[2]);
-    int32_t height = utils::stringToUint(cmds[3]);
+    const std::string& widthStr = cmds[2];
+    const std::string& heightStr = cmds[3];
+    int32_t width = utils::stringToUint(widthStr);
+    int32_t height = utils::stringToUint(heightStr);
     if(width == -1 || height == -1){
         return 13;
     }

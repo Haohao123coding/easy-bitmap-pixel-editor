@@ -51,7 +51,7 @@ color utils::analyseColor(std::string str){
     }
 }
 
-int32_t stringToInt(const std::string& str){
+int32_t utils::stringToUint(const std::string& str){
     uint32_t len = str.length();
     for(uint32_t i = 0; i < len; i++){
         if(!isdigit(str[i])){

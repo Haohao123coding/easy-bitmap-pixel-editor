@@ -12,7 +12,7 @@ namespace utils{
     int32_t hexToDec(char hex);
     int32_t hex2ToDec(std::string hex);
     color analyseColor(std::string str);
-    int32_t stringToUint(std::string str);
+    int32_t stringToUint(const std::string& str);
 }
 
 #endif //EASY_BITMAP_PIXEL_EDITOR_UTILS_H
