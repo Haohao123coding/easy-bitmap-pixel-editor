@@ -11,4 +11,6 @@ add_executable(ebpe
         src/cmdOpr.cpp
         src/cmdOpr.h
         src/helpCommand/helpCommand.h
+        src/utils.cpp
+        src/utils.h
 )

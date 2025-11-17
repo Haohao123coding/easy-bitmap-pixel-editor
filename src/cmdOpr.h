@@ -11,10 +11,6 @@
 extern bmpFile curFile;
 
 namespace cmdOpr{
-    // utils:
-    int32_t hex_to_dec(char hex);
-    int32_t hex_2_to_dec(std::string hex);
-    color analyseColor(std::string str);
     // analysers:
     int32_t analyseGen(uint32_t wordCount, std::vector<std::string> cmds);
     int32_t analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds);
