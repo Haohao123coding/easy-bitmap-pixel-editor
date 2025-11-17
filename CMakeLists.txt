@@ -10,4 +10,5 @@ add_executable(ebpe
         src/bmpFile.h
         src/cmdOpr.cpp
         src/cmdOpr.h
+        src/helpCommand/helpCommand.h
 )

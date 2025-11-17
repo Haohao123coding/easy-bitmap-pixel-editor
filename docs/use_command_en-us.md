@@ -79,3 +79,10 @@ Coordinates start from 0. If coordinates are out of bounds, output `Pixel coordi
     - `draw rect <xFirst> <yFirst> <xLast> <yLast> <color> <borderPixelCount>`
     
     Draw a rectangle using `color`. `borderPixelCount` means the line width, the outermost edge remains at the original position (four angles). If no `borderPixelCount`, draw filled rectangle.
+
+### help
+
+Usage：
+- `help <command>`
+
+Output all commands or the usage of `<command>`.

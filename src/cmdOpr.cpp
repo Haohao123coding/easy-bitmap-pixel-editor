@@ -10,6 +10,7 @@
 
 #include "bmpFile.h"
 #include "cmdOpr.h"
+#include "helpCommand/helpCommand.h"
 
 bmpFile curFile;
 
@@ -24,9 +25,11 @@ int32_t cmdOpr::hex_to_dec(char hex){
         return 0;
     }
 }
+
 int32_t cmdOpr::hex_2_to_dec(std::string hex){
     return hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]);
 }
+
 color cmdOpr::analyseColor(std::string str){
     int32_t colorByte;
     uint32_t len = str.length();
@@ -74,6 +77,7 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, std::vector<std::string> cmds){
     curFile = bmpFile(width, height, filling, fileName);
     return 0;
 }
+
 int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 2){
         return 10;
@@ -81,6 +85,7 @@ int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& 
     curFile.openBMP(cmds[1]);
     return 0;
 }
+
 int32_t cmdOpr::analyseSave(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 1){
         return 10;
@@ -88,6 +93,7 @@ int32_t cmdOpr::analyseSave(uint32_t wordCount, const std::vector<std::string>& 
     curFile.saveBMP();
     return 0;
 }
+
 int32_t cmdOpr::analyseSet(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 3){
         return 10;
@@ -104,6 +110,7 @@ int32_t cmdOpr::analyseSet(uint32_t wordCount, const std::vector<std::string>& c
     curFile.calcSetBMP();
     return 0;
 }
+
 int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 2){
         return 10;
@@ -119,6 +126,7 @@ int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& c
     std::cout << cmds[1] << ": " << answer << std::endl;
     return 0;
 }
+
 int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount < 2){
         return 10;
@@ -161,6 +169,7 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
     }
     return 11;
 }
+
 int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 1){
         return 10;
@@ -168,6 +177,28 @@ int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& 
     curFile.saveBMP();
     exit(0);
 }
+
+int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds){
+    if(wordCount != 1 && wordCount != 2){
+        return 10;
+    }
+    if(wordCount == 1){
+        for(const std::string& cmd : commands){
+            std::cout << cmd << '\t';
+        }
+        std::cout << std::endl;
+    }else{
+        const std::string& cmd = cmds[1];
+        if(helpCommand.find(cmd) == helpCommand.end()){
+            return 11;
+        }
+        for(const std::string& usage : helpCommand[cmd]){
+            std::cout << usage << std::endl;
+        }
+    }
+    return 0;
+}
+
 
 void cmdOpr::outPutError(int32_t errCode){
     if(errCode == 0){ return; }
@@ -220,6 +251,8 @@ void cmdOpr::loopTime(){
         res = analyseDraw(wordCount, cmds);
     }else if(cmds[0] == "exit"){
         res = analyseExit(wordCount, cmds);
+    }else if(cmds[0] == "help"){
+        res = analyseHelp(wordCount, cmds);
     }else{
         std::cerr << "Unknown Command!" << std::endl;
     }

@@ -23,6 +23,7 @@ namespace cmdOpr{
     int32_t analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds);
     int32_t analyseDraw(uint32_t wordCount, const std::vector<std::string>& cmds);
     int32_t analyseExit(uint32_t wordCount, const std::vector<std::string>& cmds);
+    int32_t analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds);
     void outPutError(int32_t errCode);
     // looptime:
     void loopTime();
