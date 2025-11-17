@@ -81,6 +81,7 @@
 ### help
 
 用法：
+- `help`
 - `help <command>`
 
-输出 `<command>` 的用法。
+输出所有命令或 `<command>` 的用法。

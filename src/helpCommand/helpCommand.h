@@ -9,6 +9,10 @@
 #include <string>
 #include <vector>
 
+std::vector<std::string> commands = {
+    "gen", "open", "save", "exit", "set", "get", "draw", "help"
+};
+
 std::map<std::string, std::vector<std::string>> helpCommand = {
     {
         "gen", {

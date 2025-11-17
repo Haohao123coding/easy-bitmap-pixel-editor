@@ -179,15 +179,22 @@ int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& 
 }
 
 int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds){
-    if(wordCount != 2){
+    if(wordCount != 1 && wordCount != 2){
         return 10;
     }
-    const std::string& cmd = cmds[1];
-    if(helpCommand.find(cmd) == helpCommand.end()){
-        return 11;
-    }
-    for(const std::string& usage : helpCommand[cmd]){
-        std::cout << usage << std::endl;
+    if(wordCount == 1){
+        for(const std::string& cmd : commands){
+            std::cout << cmd << '\t';
+        }
+        std::cout << std::endl;
+    }else{
+        const std::string& cmd = cmds[1];
+        if(helpCommand.find(cmd) == helpCommand.end()){
+            return 11;
+        }
+        for(const std::string& usage : helpCommand[cmd]){
+            std::cout << usage << std::endl;
+        }
     }
     return 0;
 }
