@@ -82,7 +82,8 @@ Coordinates start from 0. If coordinates are out of bounds, output `Pixel coordi
 
 ### help
 
-Usage：
+Usage:
+- `help`
 - `help <command>`
 
 Output all commands or the usage of `<command>`.
