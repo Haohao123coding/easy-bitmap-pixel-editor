@@ -39,7 +39,7 @@ bmpFile::bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha){
         bmap[i].resize(bWidth);
     }
 }
-bmpFile::bmpFile(int32_t width, int32_t height, color filling, std::string fileName){
+bmpFile::bmpFile(int32_t width, int32_t height, color filling, const std::string& fileName){
     // calc
     uint16_t colorByte = filling.bit / 8;
     int32_t rowSize = (width * colorByte + 3) / 4 * 4;
@@ -70,7 +70,7 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, std::string fileN
     bmap = bm;
 
     // save file
-    curFileName = std::move(fileName);
+    curFileName = fileName;
     saveBMP();
 }
 
