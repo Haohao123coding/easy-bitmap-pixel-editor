@@ -67,9 +67,9 @@ public:
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c);
     void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount);
 
-    void openBMP(const std::string& fileName);
+    void openBMP(const std::string& fileName, bool isScriptFileMode);
     void calcSetBMP();
-    void saveBMP();
+    void saveBMP(bool isScriptFileMode);
 };
 
 #pragma pack(pop) // Restore byte alignment

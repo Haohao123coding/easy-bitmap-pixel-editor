@@ -71,7 +71,7 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, const std::string
 
     // save file
     curFileName = fileName;
-    saveBMP();
+    saveBMP(true);
 }
 
 
@@ -108,10 +108,10 @@ void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, c
     drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
     drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
 }
-void bmpFile::openBMP(const std::string& fileName){
+void bmpFile::openBMP(const std::string& fileName, bool isScriptFileMode){
     // open file
     std::ifstream file(fileName, std::ios::binary);
-    if(!file.is_open()){
+    if(!file.is_open() && !isScriptFileMode){
         std::cerr << "No file!" << std::endl;
         return;
     }
@@ -121,15 +121,16 @@ void bmpFile::openBMP(const std::string& fileName){
     file.read(reinterpret_cast<char*>(&infoh), sizeof(infoHeader));
 
     // check
-    if(fileh.bfType != 0x4D42){
+    if(fileh.bfType != 0x4D42 && !isScriptFileMode){
         std::cerr << "Not BMP file!" << std::endl;
+        return;
     }
-    if(
+    if((
         fileh.bfReserved1 != 0 ||
         fileh.bfReserved2 != 0 ||
         fileh.bfOffBits != 54
-    ){ std::cerr << "No Support For This Format!"; return; }
-    if(
+    ) && !isScriptFileMode){ std::cerr << "No Support For This Format!"; return; }
+    if((
         infoh.biSize != 40 ||
         infoh.biWidth < 0 ||
         infoh.biHeight < 0 ||
@@ -143,7 +144,7 @@ void bmpFile::openBMP(const std::string& fileName){
         infoh.biYPixelsPerMeter != 0 ||
         infoh.biClrUsed != 0 ||
         infoh.biClrImportant != 0
-    ){ std::cerr << "No Support For This Format!"; return; }
+    ) && !isScriptFileMode){ std::cerr << "No Support For This Format!"; return; }
 
     // calc
     int32_t width = infoh.biWidth;
@@ -194,10 +195,10 @@ void bmpFile::calcSetBMP(){
     fileh.bfSize = sizeof(fileh) + sizeof(infoh) + infoh.biSizeImage;
 }
 
-void bmpFile::saveBMP(){
+void bmpFile::saveBMP(bool isScriptFileMode){
     // open file
     std::ofstream file(curFileName, std::ios::binary);
-    if(!file.is_open()){
+    if(!file.is_open() && !isScriptFileMode){
         std::cerr << "No file!" << std::endl;
         return;
     }

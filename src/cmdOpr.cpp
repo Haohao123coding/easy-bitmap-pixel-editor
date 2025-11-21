@@ -12,7 +12,7 @@
 
 bmpFile curFile;
 
-int32_t cmdOpr::analyseGen(uint32_t wordCount, std::vector<std::string> cmds){
+int32_t cmdOpr::analyseGen(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 4 && wordCount != 5){
         return 10;
     }
@@ -42,7 +42,7 @@ int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& 
     return 0;
 }
 
-int32_t cmdOpr::analyseSave(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseSave(uint32_t wordCount){
     if(wordCount != 1){
         return 10;
     }
@@ -71,7 +71,7 @@ int32_t cmdOpr::analyseSet(uint32_t wordCount, const std::vector<std::string>& c
     return 0;
 }
 
-int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode){
     if(wordCount != 2){
         return 10;
     }
@@ -83,7 +83,9 @@ int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& c
     }else{
         return 11;
     }
-    std::cout << cmds[1] << ": " << answer << std::endl;
+    if(!isScriptFileMode){
+        std::cout << cmds[1] << ": " << answer << std::endl;
+    }
     return 0;
 }
 
@@ -133,7 +135,7 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
     return 11;
 }
 
-int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseExit(uint32_t wordCount){
     if(wordCount != 1){
         return 10;
     }
@@ -141,7 +143,10 @@ int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& 
     exit(0);
 }
 
-int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode){
+    if(isScriptFileMode){
+        return 0;
+    }
     if(wordCount != 1 && wordCount != 2){
         return 10;
     }
@@ -219,17 +224,17 @@ void cmdOpr::loopTime(bool isScriptFileMode){
     }else if(cmds[0] == "open"){
         res = analyseOpen(wordCount, cmds);
     }else if(cmds[0] == "save"){
-        res = analyseSave(wordCount, cmds);
+        res = analyseSave(wordCount);
     }else if(cmds[0] == "set"){
         res = analyseSet(wordCount, cmds);
     }else if(cmds[0] == "get"){
-        res = analyseGet(wordCount, cmds);
+        res = analyseGet(wordCount, cmds, isScriptFileMode);
     }else if(cmds[0] == "draw"){
         res = analyseDraw(wordCount, cmds);
     }else if(cmds[0] == "exit"){
-        res = analyseExit(wordCount, cmds);
+        res = analyseExit(wordCount);
     }else if(cmds[0] == "help"){
-        res = analyseHelp(wordCount, cmds);
+        res = analyseHelp(wordCount, cmds, isScriptFileMode);
     }else if(cmds[0] == "echo"){
         res = analyseEcho(wordCount, cmds);
     }else{

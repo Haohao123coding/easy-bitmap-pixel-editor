@@ -12,14 +12,14 @@ extern bmpFile curFile;
 
 namespace cmdOpr{
     // analysers:
-    int32_t analyseGen(uint32_t wordCount, std::vector<std::string> cmds);
+    int32_t analyseGen(uint32_t wordCount, const std::vector<std::string>& cmds);
     int32_t analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds);
-    int32_t analyseSave(uint32_t wordCount, const std::vector<std::string>& cmds);
+    int32_t analyseSave(uint32_t wordCount);
     int32_t analyseSet(uint32_t wordCount, const std::vector<std::string>& cmds);
-    int32_t analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds);
+    int32_t analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode);
     int32_t analyseDraw(uint32_t wordCount, const std::vector<std::string>& cmds);
-    int32_t analyseExit(uint32_t wordCount, const std::vector<std::string>& cmds);
-    int32_t analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds);
+    int32_t analyseExit(uint32_t wordCount);
+    int32_t analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode);
     int32_t analyseEcho(uint32_t wordCount, const std::vector<std::string>& cmds);
     void outPutError(int32_t errCode);
     // looptime:
