@@ -2,13 +2,18 @@
 
 How to build EBPE project?
 
-EBPE uses CMake. You can build like this:
+EBPE uses CMake. You may configure options first like this:
 
 ```bash
 cmake -B cmake-build-debug -G "Ninja" -DCMAKE_BUILD_TYPE=Debug
-mkdir cmake-build-debug
-cd cmake-build-debug
+```
+
+You can build like this:
+
+```bash
+mkdir cmake-build
+cd cmake-build
 cmake --build . --target ebpe
 ```
 
-For release builds, `Debug` -> `Release`, `cmake-build-release` -> `cmake-build-release`.
+For release builds, build type `Debug` -> `Release`.
