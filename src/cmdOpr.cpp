@@ -178,16 +178,21 @@ void cmdOpr::outPutError(int32_t errCode){
     }
 }
 
-void cmdOpr::loopTime(){
-    if(curFile.getCurFileName().empty()){
-        std::cout << "(No File)";
+void cmdOpr::loopTime(bool isScriptFileMode){
+    if(!isScriptFileMode){
+        if(curFile.getCurFileName().empty()){
+            std::cout << "(No File)";
+        }
+        std::cout << curFile.getCurFileName() << '>';
     }
-    std::cout << curFile.getCurFileName() << '>';
 
     // read commands
     std::string cmd, tmp;
     std::vector<std::string> cmds;
     getline(std::cin, cmd);
+    if(cmd.empty() && isScriptFileMode){
+        exit(0);
+    }
     cmd += ' '; // add a space
     uint32_t len = cmd.length(), wordCount = 0;
     for(uint32_t i = 0; i < len; i++){
@@ -219,7 +224,11 @@ void cmdOpr::loopTime(){
     }else if(cmds[0] == "help"){
         res = analyseHelp(wordCount, cmds);
     }else{
-        std::cerr << "Unknown Command!" << std::endl;
+        if(!isScriptFileMode){
+            std::cerr << "Unknown Command!" << std::endl;
+        }
     }
-    outPutError(res);
+    if(!isScriptFileMode){
+        outPutError(res);
+    }
 }
