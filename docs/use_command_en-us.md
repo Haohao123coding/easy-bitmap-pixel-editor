@@ -87,3 +87,10 @@ Usage:
 - `help <command>`
 
 Output all commands or the usage of `<command>`.
+
+### echo
+
+Usage:
+- `echo <message>`
+
+Output word (no spaces) `<message>`。

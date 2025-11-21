@@ -162,6 +162,13 @@ int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& 
     return 0;
 }
 
+int32_t cmdOpr::analyseEcho(uint32_t wordCount, const std::vector<std::string>& cmds){
+    if(wordCount != 2){
+        return 10;
+    }
+    std::cout << cmds[1] << std::endl;
+    return 0;
+}
 
 void cmdOpr::outPutError(int32_t errCode){
     if(errCode == 0){ return; }
@@ -223,6 +230,8 @@ void cmdOpr::loopTime(bool isScriptFileMode){
         res = analyseExit(wordCount, cmds);
     }else if(cmds[0] == "help"){
         res = analyseHelp(wordCount, cmds);
+    }else if(cmds[0] == "echo"){
+        res = analyseEcho(wordCount, cmds);
     }else{
         if(!isScriptFileMode){
             std::cerr << "Unknown Command!" << std::endl;
