@@ -34,19 +34,19 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, const std::vector<std::string>& c
     return 0;
 }
 
-int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode){
     if(wordCount != 2){
         return 10;
     }
-    curFile.openBMP(cmds[1]);
+    curFile.openBMP(cmds[1], isScriptFileMode);
     return 0;
 }
 
-int32_t cmdOpr::analyseSave(uint32_t wordCount){
+int32_t cmdOpr::analyseSave(uint32_t wordCount, bool isScriptFileMode){
     if(wordCount != 1){
         return 10;
     }
-    curFile.saveBMP();
+    curFile.saveBMP(isScriptFileMode);
     return 0;
 }
 
@@ -135,11 +135,11 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
     return 11;
 }
 
-int32_t cmdOpr::analyseExit(uint32_t wordCount){
+int32_t cmdOpr::analyseExit(uint32_t wordCount, bool isScriptFileMode){
     if(wordCount != 1){
         return 10;
     }
-    curFile.saveBMP();
+    curFile.saveBMP(isScriptFileMode);
     exit(0);
 }
 
@@ -222,9 +222,9 @@ void cmdOpr::loopTime(bool isScriptFileMode){
     if(cmds[0] == "gen"){
         res = analyseGen(wordCount, cmds);
     }else if(cmds[0] == "open"){
-        res = analyseOpen(wordCount, cmds);
+        res = analyseOpen(wordCount, cmds, isScriptFileMode);
     }else if(cmds[0] == "save"){
-        res = analyseSave(wordCount);
+        res = analyseSave(wordCount, isScriptFileMode);
     }else if(cmds[0] == "set"){
         res = analyseSet(wordCount, cmds);
     }else if(cmds[0] == "get"){
@@ -232,7 +232,7 @@ void cmdOpr::loopTime(bool isScriptFileMode){
     }else if(cmds[0] == "draw"){
         res = analyseDraw(wordCount, cmds);
     }else if(cmds[0] == "exit"){
-        res = analyseExit(wordCount);
+        res = analyseExit(wordCount, isScriptFileMode);
     }else if(cmds[0] == "help"){
         res = analyseHelp(wordCount, cmds, isScriptFileMode);
     }else if(cmds[0] == "echo"){
