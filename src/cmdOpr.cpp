@@ -4,73 +4,29 @@
 
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <cstdint>
-#include <string>
 
 #include "bmpFile.h"
 #include "cmdOpr.h"
+#include "utils.h"
 #include "helpCommand/helpCommand.h"
 
 bmpFile curFile;
 
-int32_t cmdOpr::hex_to_dec(char hex){
-    if(hex >= '0' && hex <= '9'){
-        return hex - '0';
-    }else if(hex >= 'A' && hex <= 'F'){
-        return hex - 'A' + 10;
-    }else if(hex >= 'a' && hex <= 'f'){
-        return hex - 'a' + 10;
-    }else{
-        return 0;
-    }
-}
-
-int32_t cmdOpr::hex_2_to_dec(std::string hex){
-    return hex_to_dec(hex[0]) * 16 + hex_to_dec(hex[1]);
-}
-
-color cmdOpr::analyseColor(std::string str){
-    int32_t colorByte;
-    uint32_t len = str.length();
-    if(len == 7){
-        colorByte = 3;
-    }else{
-        colorByte = 4;
-    }
-    if(str[0] != '#' || (len != 7 && len != 9)){
-        // wrong format
-        return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
-    }
-    for(int32_t i = 1; i < len; i++){
-        if(!((str[i] >= '0' && str[i] <= '9') ||
-        (str[i] >= 'a' && str[i] <= 'f'))){
-            // wrong format
-            return colorByte == 3 ? color(0, 0, 0) : color(0, 0, 0, 0);
-        }
-    }
-    uint8_t r = static_cast<uint8_t>(hex_2_to_dec(str.substr(1, 2)));
-    uint8_t g = static_cast<uint8_t>(hex_2_to_dec(str.substr(3, 2)));
-    uint8_t b = static_cast<uint8_t>(hex_2_to_dec(str.substr(5, 2)));
-    uint8_t a = 0;
-    if(colorByte == 4) a = static_cast<uint8_t>(hex_2_to_dec(str.substr(7, 2)));
-    if(colorByte == 3){
-        return {r, g, b};
-    }else{
-        return {r, g, b, a};
-    }
-}
-
-int32_t cmdOpr::analyseGen(uint32_t wordCount, std::vector<std::string> cmds){
+int32_t cmdOpr::analyseGen(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 4 && wordCount != 5){
         return 10;
     }
     const std::string& fileName = cmds[1];
-    int32_t width = stoi(cmds[2]);
-    int32_t height = stoi(cmds[3]);
+    const std::string& widthStr = cmds[2];
+    const std::string& heightStr = cmds[3];
+    int32_t width = utils::stringToUint(widthStr);
+    int32_t height = utils::stringToUint(heightStr);
+    if(width == -1 || height == -1){
+        return 13;
+    }
     color filling;
     if(wordCount == 5){
-        filling = analyseColor(cmds[4]);
+        filling = utils::analyseColor(cmds[4]);
     }else{
         filling = color(255, 255, 255, 255);
     }
@@ -78,19 +34,19 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, std::vector<std::string> cmds){
     return 0;
 }
 
-int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseOpen(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode){
     if(wordCount != 2){
         return 10;
     }
-    curFile.openBMP(cmds[1]);
+    curFile.openBMP(cmds[1], isScriptFileMode);
     return 0;
 }
 
-int32_t cmdOpr::analyseSave(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseSave(uint32_t wordCount, bool isScriptFileMode){
     if(wordCount != 1){
         return 10;
     }
-    curFile.saveBMP();
+    curFile.saveBMP(isScriptFileMode);
     return 0;
 }
 
@@ -99,10 +55,14 @@ int32_t cmdOpr::analyseSet(uint32_t wordCount, const std::vector<std::string>& c
         return 10;
     }
     infoHeader ih = curFile.getInfoHeader();
+    int32_t setVal = utils::stringToUint(cmds[2]);
+    if(setVal == -1){
+        return 13;
+    }
     if(cmds[1] == "width"){
-        ih.biWidth = stoi(cmds[2]);
+        ih.biWidth = setVal;
     }else if(cmds[1] == "height"){
-        ih.biHeight = stoi(cmds[2]);
+        ih.biHeight = setVal;
     }else{
         return 11;
     }
@@ -111,7 +71,7 @@ int32_t cmdOpr::analyseSet(uint32_t wordCount, const std::vector<std::string>& c
     return 0;
 }
 
-int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode){
     if(wordCount != 2){
         return 10;
     }
@@ -123,7 +83,9 @@ int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& c
     }else{
         return 11;
     }
-    std::cout << cmds[1] << ": " << answer << std::endl;
+    if(!isScriptFileMode){
+        std::cout << cmds[1] << ": " << answer << std::endl;
+    }
     return 0;
 }
 
@@ -135,9 +97,9 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         if(wordCount != 5){
             return 10;
         }
-        int32_t x = stoi(cmds[2]);
-        int32_t y = stoi(cmds[3]);
-        color color_set = analyseColor(cmds[4]);
+        int32_t x = utils::stringToUint(cmds[2]);
+        int32_t y = utils::stringToUint(cmds[3]);
+        color color_set = utils::analyseColor(cmds[4]);
         if(x < 0 || x >= curFile.getInfoHeader().biHeight ||
         y < 0 || y >= curFile.getInfoHeader().biWidth){
             return 12;
@@ -148,11 +110,11 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         if(wordCount != 7 && wordCount != 8){
             return 10;
         }
-        int32_t xf = stoi(cmds[2]);
-        int32_t yf = stoi(cmds[3]);
-        int32_t xl = stoi(cmds[4]);
-        int32_t yl = stoi(cmds[5]);
-        color color_set = analyseColor(cmds[6]);
+        int32_t xf = utils::stringToUint(cmds[2]);
+        int32_t yf = utils::stringToUint(cmds[3]);
+        int32_t xl = utils::stringToUint(cmds[4]);
+        int32_t yl = utils::stringToUint(cmds[5]);
+        color color_set = utils::analyseColor(cmds[6]);
         if(xf < 0 || xf >= curFile.getInfoHeader().biHeight ||
         xl < 0 || xl >= curFile.getInfoHeader().biHeight ||
         yf < 0 || yf >= curFile.getInfoHeader().biWidth ||
@@ -162,7 +124,10 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         if(wordCount == 7){
             curFile.drawRect(xf, yf, xl, yl, color_set);
         }else{
-            int32_t borderPixelCount = stoi(cmds[7]);
+            int32_t borderPixelCount = utils::stringToUint(cmds[7]);
+            if(borderPixelCount == -1){
+                return 13;
+            }
             curFile.drawUnfilledRect(xf, yf, xl, yl, color_set, borderPixelCount);
         }
         return 0;
@@ -170,15 +135,18 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
     return 11;
 }
 
-int32_t cmdOpr::analyseExit(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseExit(uint32_t wordCount, bool isScriptFileMode){
     if(wordCount != 1){
         return 10;
     }
-    curFile.saveBMP();
+    curFile.saveBMP(isScriptFileMode);
     exit(0);
 }
 
-int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds){
+int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& cmds, bool isScriptFileMode){
+    if(isScriptFileMode){
+        return 0;
+    }
     if(wordCount != 1 && wordCount != 2){
         return 10;
     }
@@ -199,6 +167,13 @@ int32_t cmdOpr::analyseHelp(uint32_t wordCount, const std::vector<std::string>& 
     return 0;
 }
 
+int32_t cmdOpr::analyseEcho(uint32_t wordCount, const std::vector<std::string>& cmds){
+    if(wordCount != 2){
+        return 10;
+    }
+    std::cout << cmds[1] << std::endl;
+    return 0;
+}
 
 void cmdOpr::outPutError(int32_t errCode){
     if(errCode == 0){ return; }
@@ -207,22 +182,29 @@ void cmdOpr::outPutError(int32_t errCode){
     }else if(errCode == 11){
         std::cerr << "Unknown argument!" << std::endl;
     }else if(errCode == 12){
-        std::cerr << "Pixel coordinates out of bounds!" << std::endl;
+        std::cerr << "Pixel coordinates out of bounds! (Or number is not a number)" << std::endl;
+    }else if(errCode == 13){
+        std::cerr << "Number is not a number!" << std::endl;
     }else{
         std::cerr << "Unknown Error!" << std::endl;
     }
 }
 
-void cmdOpr::loopTime(){
-    if(curFile.getCurFileName().empty()){
-        std::cout << "(No File)";
+void cmdOpr::loopTime(bool isScriptFileMode){
+    if(!isScriptFileMode){
+        if(curFile.getCurFileName().empty()){
+            std::cout << "(No File)";
+        }
+        std::cout << curFile.getCurFileName() << '>';
     }
-    std::cout << curFile.getCurFileName() << '>';
 
     // read commands
     std::string cmd, tmp;
     std::vector<std::string> cmds;
     getline(std::cin, cmd);
+    if(cmd.empty() && isScriptFileMode){
+        exit(0);
+    }
     cmd += ' '; // add a space
     uint32_t len = cmd.length(), wordCount = 0;
     for(uint32_t i = 0; i < len; i++){
@@ -240,21 +222,27 @@ void cmdOpr::loopTime(){
     if(cmds[0] == "gen"){
         res = analyseGen(wordCount, cmds);
     }else if(cmds[0] == "open"){
-        res = analyseOpen(wordCount, cmds);
+        res = analyseOpen(wordCount, cmds, isScriptFileMode);
     }else if(cmds[0] == "save"){
-        res = analyseSave(wordCount, cmds);
+        res = analyseSave(wordCount, isScriptFileMode);
     }else if(cmds[0] == "set"){
         res = analyseSet(wordCount, cmds);
     }else if(cmds[0] == "get"){
-        res = analyseGet(wordCount, cmds);
+        res = analyseGet(wordCount, cmds, isScriptFileMode);
     }else if(cmds[0] == "draw"){
         res = analyseDraw(wordCount, cmds);
     }else if(cmds[0] == "exit"){
-        res = analyseExit(wordCount, cmds);
+        res = analyseExit(wordCount, isScriptFileMode);
     }else if(cmds[0] == "help"){
-        res = analyseHelp(wordCount, cmds);
+        res = analyseHelp(wordCount, cmds, isScriptFileMode);
+    }else if(cmds[0] == "echo"){
+        res = analyseEcho(wordCount, cmds);
     }else{
-        std::cerr << "Unknown Command!" << std::endl;
+        if(!isScriptFileMode){
+            std::cerr << "Unknown Command!" << std::endl;
+        }
     }
-    outPutError(res);
+    if(!isScriptFileMode){
+        outPutError(res);
+    }
 }

@@ -85,3 +85,10 @@
 - `help <command>`
 
 输出所有命令或 `<command>` 的用法。
+
+### echo
+
+用法：
+- `echo <message>`
+
+输出单词（不含空格）`<message>`。
