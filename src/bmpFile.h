@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <map>
 
 struct color{
     uint16_t bit; // 24 or 32
@@ -15,6 +16,14 @@ struct color{
     color();
     color(uint8_t x, uint8_t y, uint8_t z);
     color(uint8_t x, uint8_t y, uint8_t z, uint8_t t);
+
+    bool operator< (const color& rhs) const;
+};
+
+struct bigColor{
+    std::map<color, uint32_t> dict;
+    bigColor();
+    explicit bigColor(color c);
 };
 
 #pragma pack(push, 1) // Disable byte alignment

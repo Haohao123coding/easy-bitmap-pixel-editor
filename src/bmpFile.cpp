@@ -20,6 +20,18 @@ color::color(uint8_t x, uint8_t y, uint8_t z, uint8_t t){
     bit = 32;
     r = x; g = y; b = z; a = t;
 }
+bool color::operator< (const color& rhs) const {
+    if(r != rhs.r) return r < rhs.r;
+    if(g != rhs.g) return g < rhs.g;
+    if(b != rhs.b) return b < rhs.b;
+    if(bit == 32 && a != rhs.a) return a < rhs.a;
+    return false;
+}
+
+bigColor::bigColor() = default;
+bigColor::bigColor(color c){
+    dict[c] = 1;
+}
 
 infoHeader::infoHeader() = default;
 infoHeader::infoHeader(int32_t width, int32_t height, bool hasAlpha){
