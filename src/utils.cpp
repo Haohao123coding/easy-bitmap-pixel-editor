@@ -17,7 +17,7 @@ int32_t utils::hexToDec(char hex){
 }
 
 int32_t utils::hex2ToDec(std::string hex){
-    return utils::hexToDec(hex[0]) * 16 + utils::hexToDec(hex[1]);
+    return hexToDec(hex[0]) * 16 + hexToDec(hex[1]);
 }
 
 color utils::analyseColor(std::string str){
@@ -49,6 +49,32 @@ color utils::analyseColor(std::string str){
     }else{
         return {r, g, b, a};
     }
+}
+
+bigColor utils::analyseBigColor(const std::string& str){
+    uint32_t len = str.length();
+    if(str[0] != '{'){
+        return bigColor(analyseColor(str));
+    }
+    if(str[len - 1] != '}'){
+        return bigColor(color(0, 0, 0));
+    }
+    std::vector<std::string> colorStrings;
+    std::map<color, uint32_t> colorDict;
+    for(uint32_t i = 1, frontPos = 1; i < len - 1; i++){
+        if(str[i] == ','){
+            colorStrings.push_back(str.substr(frontPos, i - frontPos));
+            frontPos = i + 1;
+        }
+    }
+    for(const std::string& c : colorStrings){
+        color col = analyseColor(c.substr(0, c.find_first_of(':')));
+        uint32_t weight = stringToUint(c.substr(c.find_first_of(':') + 1));
+        colorDict[col] = weight;
+    }
+    bigColor res;
+    res.dict = colorDict;
+    return res;
 }
 
 int32_t utils::stringToUint(const std::string& str){
