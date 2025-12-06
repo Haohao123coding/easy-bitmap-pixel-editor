@@ -5,7 +5,7 @@ How to build EBPE project?
 EBPE uses CMake. You may configure options first like this:
 
 ```bash
-cmake -B cmake-build-debug -G "Ninja" -DCMAKE_BUILD_TYPE=Debug
+cmake -B cmake-build -G "Ninja" -DCMAKE_BUILD_TYPE=Debug
 ```
 
 You can build like this:
