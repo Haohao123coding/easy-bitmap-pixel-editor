@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "bmpFile.h"
+#include "utils/rnd.h"
+#include "utils/utils.h"
 
 color::color(){
     bit = 24;
@@ -85,7 +87,41 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, const std::string
     curFileName = fileName;
     saveBMP(true);
 }
+bmpFile::bmpFile(int32_t width, int32_t height, bigColor filling, const std::string& fileName){
+    // calc
+    uint16_t colorByte = filling.dict.begin()->first.bit / 8;
+    int32_t rowSize = (width * colorByte + 3) / 4 * 4;
 
+    // setup file header and info header
+    fileHeader fh;
+    infoHeader ih;
+    ih.biWidth = width;
+    ih.biHeight = height;
+    ih.biBitCount = filling.dict.begin()->first.bit;
+    ih.biSizeImage = rowSize * height;
+    fh.bfSize =
+    sizeof(fh) + sizeof(ih) + ih.biSizeImage;
+    fileh = fh;
+    infoh = ih;
+
+    // setup pixels
+    std::vector<std::vector<color>> bm;
+    rnd::setupRandomSeed();
+    bm.reserve(height);
+    for(int32_t i = 0; i < height; i++){
+        std::vector<color> tmp;
+        tmp.reserve(width);
+        for(int32_t i = 0; i < width; i++){
+            tmp.push_back(utils::chooseColor(filling));
+        }
+        bm.push_back(tmp);
+    }
+    bmap = bm;
+
+    // save file
+    curFileName = fileName;
+    saveBMP(true);
+}
 
 fileHeader bmpFile::getFileHeader(){ return fileh; }
 infoHeader bmpFile::getInfoHeader(){ return infoh; }

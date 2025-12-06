@@ -7,7 +7,7 @@
 
 #include "bmpFile.h"
 #include "cmdOpr.h"
-#include "utils.h"
+#include "utils/utils.h"
 #include "helpCommand/helpCommand.h"
 
 bmpFile curFile;
@@ -24,11 +24,11 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, const std::vector<std::string>& c
     if(width == -1 || height == -1){
         return 13;
     }
-    color filling;
+    bigColor filling;
     if(wordCount == 5){
-        filling = utils::analyseColor(cmds[4]);
+        filling = utils::analyseBigColor(cmds[4]);
     }else{
-        filling = color(255, 255, 255, 255);
+        filling = bigColor(color(255, 255, 255, 255));
     }
     curFile = bmpFile(width, height, filling, fileName);
     return 0;

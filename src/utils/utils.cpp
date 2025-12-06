@@ -4,6 +4,10 @@
 
 #include "utils.h"
 
+#include <iostream>
+
+#include "rnd.h"
+
 int32_t utils::hexToDec(char hex){
     if(hex >= '0' && hex <= '9'){
         return hex - '0';
@@ -59,10 +63,14 @@ bigColor utils::analyseBigColor(const std::string& str){
     if(str[len - 1] != '}'){
         return bigColor(color(0, 0, 0));
     }
+    bool flag = false;
+    if(str[len - 2] != ','){
+        flag = true;
+    }
     std::vector<std::string> colorStrings;
     std::map<color, uint32_t> colorDict;
-    for(uint32_t i = 1, frontPos = 1; i < len - 1; i++){
-        if(str[i] == ','){
+    for(uint32_t i = 1, frontPos = 1; i < (flag ? len : len - 1); i++){
+        if(str[i] == ',' || (flag && str[i] == '}')){
             colorStrings.push_back(str.substr(frontPos, i - frontPos));
             frontPos = i + 1;
         }
@@ -85,4 +93,18 @@ int32_t utils::stringToUint(const std::string& str){
         }
     }
     return std::stoi(str);
+}
+
+color utils::chooseColor(const bigColor& bc){
+    std::vector<color> colors;
+    for(auto colorPair : bc.dict){
+        color c = colorPair.first;
+        uint32_t w = colorPair.second;
+        for(uint32_t i = 0; i < w; i++){
+            colors.push_back(c);
+        }
+    }
+    rnd::setupRandomSeed(rand());
+    int32_t point = rnd::randInt(0, (int32_t)colors.size() - 1);
+    return colors[point];
 }

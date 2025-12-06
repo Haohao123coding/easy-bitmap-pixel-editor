@@ -62,6 +62,7 @@ public:
     bmpFile();
     bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha);
     bmpFile(int32_t width, int32_t height, color filling, const std::string& fileName);
+    bmpFile(int32_t width, int32_t height, bigColor filling, const std::string& fileName);
 
     fileHeader getFileHeader();
     infoHeader getInfoHeader();
