@@ -139,6 +139,13 @@ void bmpFile::editPixel(int32_t x, int32_t y, color c){
     bm[x][y] = c;
     setBmap(bm);
 }
+
+void bmpFile::editPixel(int32_t x, int32_t y, const bigColor& c){
+    std::vector<std::vector<color>> bm = getBmap();
+    bm[x][y] = utils::chooseColor(c);
+    setBmap(bm);
+}
+
 void bmpFile::drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
     // X first; X last; Y first; Y last
     // x, y is from zero
@@ -148,6 +155,15 @@ void bmpFile::drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
         }
     }
 }
+
+void bmpFile::drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c){
+    for(int32_t i = xf; i <= xl; i++){
+        for(int32_t j = yf; j <= yl; j++){
+            editPixel(i, j, c);
+        }
+    }
+}
+
 void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount){
     // X first; X last; Y first; Y last
     // x, y is from zero
@@ -156,6 +172,14 @@ void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, c
     drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
     drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
 }
+
+void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c, int32_t borderPixelCount){
+    drawRect(xf, yf, xf + borderPixelCount - 1, yl, c);
+    drawRect(xf, yf, xl, yf + borderPixelCount - 1, c);
+    drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
+    drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
+}
+
 void bmpFile::openBMP(const std::string& fileName, bool isScriptFileMode){
     // open file
     std::ifstream file(fileName, std::ios::binary);

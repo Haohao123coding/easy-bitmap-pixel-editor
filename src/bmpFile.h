@@ -74,8 +74,11 @@ public:
     void setCurFileName(const std::string& fileName);
     
     void editPixel(int32_t x, int32_t y, color c);
+    void editPixel(int32_t x, int32_t y, const bigColor& c);
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c);
+    void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c);
     void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount);
+    void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c, int32_t borderPixelCount);
 
     void openBMP(const std::string& fileName, bool isScriptFileMode);
     void calcSetBMP();
