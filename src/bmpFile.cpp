@@ -111,7 +111,7 @@ bmpFile::bmpFile(int32_t width, int32_t height, bigColor filling, const std::str
     for(int32_t i = 0; i < height; i++){
         std::vector<color> tmp;
         tmp.reserve(width);
-        for(int32_t i = 0; i < width; i++){
+        for(int32_t j = 0; j < width; j++){
             tmp.push_back(utils::chooseColor(filling));
         }
         bm.push_back(tmp);
