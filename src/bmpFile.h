@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <map>
 
 struct color{
     uint16_t bit; // 24 or 32
@@ -15,6 +16,14 @@ struct color{
     color();
     color(uint8_t x, uint8_t y, uint8_t z);
     color(uint8_t x, uint8_t y, uint8_t z, uint8_t t);
+
+    bool operator< (const color& rhs) const;
+};
+
+struct bigColor{
+    std::map<color, uint32_t> dict;
+    bigColor();
+    explicit bigColor(color c);
 };
 
 #pragma pack(push, 1) // Disable byte alignment
@@ -53,6 +62,7 @@ public:
     bmpFile();
     bmpFile(int32_t bWidth, int32_t bHeight, bool bHasAlpha);
     bmpFile(int32_t width, int32_t height, color filling, const std::string& fileName);
+    bmpFile(int32_t width, int32_t height, bigColor filling, const std::string& fileName);
 
     fileHeader getFileHeader();
     infoHeader getInfoHeader();
@@ -64,8 +74,11 @@ public:
     void setCurFileName(const std::string& fileName);
     
     void editPixel(int32_t x, int32_t y, color c);
+    void editPixel(int32_t x, int32_t y, const bigColor& c);
     void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c);
+    void drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c);
     void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount);
+    void drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c, int32_t borderPixelCount);
 
     void openBMP(const std::string& fileName, bool isScriptFileMode);
     void calcSetBMP();

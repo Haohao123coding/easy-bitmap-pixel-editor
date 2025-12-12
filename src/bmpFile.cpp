@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "bmpFile.h"
+#include "utils/rnd.h"
+#include "utils/utils.h"
 
 color::color(){
     bit = 24;
@@ -19,6 +21,18 @@ color::color(uint8_t x, uint8_t y, uint8_t z){
 color::color(uint8_t x, uint8_t y, uint8_t z, uint8_t t){
     bit = 32;
     r = x; g = y; b = z; a = t;
+}
+bool color::operator< (const color& rhs) const {
+    if(r != rhs.r) return r < rhs.r;
+    if(g != rhs.g) return g < rhs.g;
+    if(b != rhs.b) return b < rhs.b;
+    if(bit == 32 && a != rhs.a) return a < rhs.a;
+    return false;
+}
+
+bigColor::bigColor() = default;
+bigColor::bigColor(color c){
+    dict[c] = 1;
 }
 
 infoHeader::infoHeader() = default;
@@ -73,7 +87,41 @@ bmpFile::bmpFile(int32_t width, int32_t height, color filling, const std::string
     curFileName = fileName;
     saveBMP(true);
 }
+bmpFile::bmpFile(int32_t width, int32_t height, bigColor filling, const std::string& fileName){
+    // calc
+    uint16_t colorByte = filling.dict.begin()->first.bit / 8;
+    int32_t rowSize = (width * colorByte + 3) / 4 * 4;
 
+    // setup file header and info header
+    fileHeader fh;
+    infoHeader ih;
+    ih.biWidth = width;
+    ih.biHeight = height;
+    ih.biBitCount = filling.dict.begin()->first.bit;
+    ih.biSizeImage = rowSize * height;
+    fh.bfSize =
+    sizeof(fh) + sizeof(ih) + ih.biSizeImage;
+    fileh = fh;
+    infoh = ih;
+
+    // setup pixels
+    std::vector<std::vector<color>> bm;
+    rnd::setupRandomSeed();
+    bm.reserve(height);
+    for(int32_t i = 0; i < height; i++){
+        std::vector<color> tmp;
+        tmp.reserve(width);
+        for(int32_t j = 0; j < width; j++){
+            tmp.push_back(utils::chooseColor(filling));
+        }
+        bm.push_back(tmp);
+    }
+    bmap = bm;
+
+    // save file
+    curFileName = fileName;
+    saveBMP(true);
+}
 
 fileHeader bmpFile::getFileHeader(){ return fileh; }
 infoHeader bmpFile::getInfoHeader(){ return infoh; }
@@ -91,6 +139,13 @@ void bmpFile::editPixel(int32_t x, int32_t y, color c){
     bm[x][y] = c;
     setBmap(bm);
 }
+
+void bmpFile::editPixel(int32_t x, int32_t y, const bigColor& c){
+    std::vector<std::vector<color>> bm = getBmap();
+    bm[x][y] = utils::chooseColor(c);
+    setBmap(bm);
+}
+
 void bmpFile::drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
     // X first; X last; Y first; Y last
     // x, y is from zero
@@ -100,6 +155,15 @@ void bmpFile::drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c){
         }
     }
 }
+
+void bmpFile::drawRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c){
+    for(int32_t i = xf; i <= xl; i++){
+        for(int32_t j = yf; j <= yl; j++){
+            editPixel(i, j, c);
+        }
+    }
+}
+
 void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, color c, int32_t borderPixelCount){
     // X first; X last; Y first; Y last
     // x, y is from zero
@@ -108,6 +172,14 @@ void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, c
     drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
     drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
 }
+
+void bmpFile::drawUnfilledRect(int32_t xf, int32_t yf, int32_t xl, int32_t yl, const bigColor& c, int32_t borderPixelCount){
+    drawRect(xf, yf, xf + borderPixelCount - 1, yl, c);
+    drawRect(xf, yf, xl, yf + borderPixelCount - 1, c);
+    drawRect(xl - borderPixelCount + 1, yf, xl, yl, c);
+    drawRect(xf, yl - borderPixelCount + 1, xl, yl, c);
+}
+
 void bmpFile::openBMP(const std::string& fileName, bool isScriptFileMode){
     // open file
     std::ifstream file(fileName, std::ios::binary);

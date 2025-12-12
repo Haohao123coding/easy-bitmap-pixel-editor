@@ -4,6 +4,10 @@
 
 #include "utils.h"
 
+#include <iostream>
+
+#include "rnd.h"
+
 int32_t utils::hexToDec(char hex){
     if(hex >= '0' && hex <= '9'){
         return hex - '0';
@@ -17,7 +21,7 @@ int32_t utils::hexToDec(char hex){
 }
 
 int32_t utils::hex2ToDec(std::string hex){
-    return utils::hexToDec(hex[0]) * 16 + utils::hexToDec(hex[1]);
+    return hexToDec(hex[0]) * 16 + hexToDec(hex[1]);
 }
 
 color utils::analyseColor(std::string str){
@@ -51,6 +55,36 @@ color utils::analyseColor(std::string str){
     }
 }
 
+bigColor utils::analyseBigColor(const std::string& str){
+    uint32_t len = str.length();
+    if(str[0] != '{'){
+        return bigColor(analyseColor(str));
+    }
+    if(str[len - 1] != '}'){
+        return bigColor(color(0, 0, 0));
+    }
+    bool flag = false;
+    if(str[len - 2] != ','){
+        flag = true;
+    }
+    std::vector<std::string> colorStrings;
+    std::map<color, uint32_t> colorDict;
+    for(uint32_t i = 1, frontPos = 1; i < (flag ? len : len - 1); i++){
+        if(str[i] == ',' || (flag && str[i] == '}')){
+            colorStrings.push_back(str.substr(frontPos, i - frontPos));
+            frontPos = i + 1;
+        }
+    }
+    for(const std::string& c : colorStrings){
+        color col = analyseColor(c.substr(0, c.find_first_of(':')));
+        uint32_t weight = stringToUint(c.substr(c.find_first_of(':') + 1));
+        colorDict[col] = weight;
+    }
+    bigColor res;
+    res.dict = colorDict;
+    return res;
+}
+
 int32_t utils::stringToUint(const std::string& str){
     uint32_t len = str.length();
     for(uint32_t i = 0; i < len; i++){
@@ -59,4 +93,18 @@ int32_t utils::stringToUint(const std::string& str){
         }
     }
     return std::stoi(str);
+}
+
+color utils::chooseColor(const bigColor& bc){
+    std::vector<color> colors;
+    for(auto colorPair : bc.dict){
+        color c = colorPair.first;
+        uint32_t w = colorPair.second;
+        for(uint32_t i = 0; i < w; i++){
+            colors.push_back(c);
+        }
+    }
+    rnd::setupRandomSeed(rand());
+    int32_t point = rnd::randInt(0, (int32_t)colors.size() - 1);
+    return colors[point];
 }

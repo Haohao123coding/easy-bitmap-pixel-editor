@@ -7,8 +7,9 @@
 
 #include "bmpFile.h"
 #include "cmdOpr.h"
-#include "utils.h"
+#include "utils/utils.h"
 #include "helpCommand/helpCommand.h"
+#include "utils/rnd.h"
 
 bmpFile curFile;
 
@@ -24,11 +25,11 @@ int32_t cmdOpr::analyseGen(uint32_t wordCount, const std::vector<std::string>& c
     if(width == -1 || height == -1){
         return 13;
     }
-    color filling;
+    bigColor filling;
     if(wordCount == 5){
-        filling = utils::analyseColor(cmds[4]);
+        filling = utils::analyseBigColor(cmds[4]);
     }else{
-        filling = color(255, 255, 255, 255);
+        filling = bigColor(color(255, 255, 255, 255));
     }
     curFile = bmpFile(width, height, filling, fileName);
     return 0;
@@ -90,6 +91,7 @@ int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& c
 }
 
 int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& cmds){
+    rnd::setupRandomSeed();
     if(wordCount < 2){
         return 10;
     }
@@ -99,7 +101,7 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         }
         int32_t x = utils::stringToUint(cmds[2]);
         int32_t y = utils::stringToUint(cmds[3]);
-        color color_set = utils::analyseColor(cmds[4]);
+        bigColor color_set = utils::analyseBigColor(cmds[4]);
         if(x < 0 || x >= curFile.getInfoHeader().biHeight ||
         y < 0 || y >= curFile.getInfoHeader().biWidth){
             return 12;
@@ -114,7 +116,7 @@ int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& 
         int32_t yf = utils::stringToUint(cmds[3]);
         int32_t xl = utils::stringToUint(cmds[4]);
         int32_t yl = utils::stringToUint(cmds[5]);
-        color color_set = utils::analyseColor(cmds[6]);
+        bigColor color_set = utils::analyseBigColor(cmds[6]);
         if(xf < 0 || xf >= curFile.getInfoHeader().biHeight ||
         xl < 0 || xl >= curFile.getInfoHeader().biHeight ||
         yf < 0 || yf >= curFile.getInfoHeader().biWidth ||
