@@ -12,6 +12,7 @@
 #include "utils/rnd.h"
 
 bmpFile curFile;
+rnd rndGen;
 
 int32_t cmdOpr::analyseGen(uint32_t wordCount, const std::vector<std::string>& cmds){
     if(wordCount != 4 && wordCount != 5){
@@ -91,7 +92,7 @@ int32_t cmdOpr::analyseGet(uint32_t wordCount, const std::vector<std::string>& c
 }
 
 int32_t cmdOpr::analyseDraw(uint32_t wordCount, const std::vector<std::string>& cmds){
-    rnd::setupRandomSeed();
+    rndGen.setupRandomSeed();
     if(wordCount < 2){
         return 10;
     }

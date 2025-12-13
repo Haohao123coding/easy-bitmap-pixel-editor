@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "bmpFile.h"
+#include "cmdOpr.h"
 #include "utils/rnd.h"
 #include "utils/utils.h"
 
@@ -106,7 +107,7 @@ bmpFile::bmpFile(int32_t width, int32_t height, bigColor filling, const std::str
 
     // setup pixels
     std::vector<std::vector<color>> bm;
-    rnd::setupRandomSeed();
+    rndGen.setupRandomSeed();
     bm.reserve(height);
     for(int32_t i = 0; i < height; i++){
         std::vector<color> tmp;

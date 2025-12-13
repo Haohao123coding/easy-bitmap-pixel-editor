@@ -7,8 +7,10 @@
 
 #include <string>
 #include "bmpFile.h"
+#include "utils/rnd.h"
 
 extern bmpFile curFile;
+extern rnd rndGen;
 
 namespace cmdOpr{
     // analysers:
