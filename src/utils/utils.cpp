@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 Haohao123coding
 
-#include "utils.h"
-
 #include <iostream>
 
+#include "utils.h"
 #include "rnd.h"
+#include "../cmdOpr.h"
 
 int32_t utils::hexToDec(char hex){
     if(hex >= '0' && hex <= '9'){
@@ -104,7 +104,7 @@ color utils::chooseColor(const bigColor& bc){
             colors.push_back(c);
         }
     }
-    rnd::setupRandomSeed(rand());
-    int32_t point = rnd::randInt(0, (int32_t)colors.size() - 1);
+    rndGen.setupRandomSeed();
+    int32_t point = rndGen.randInt(0, (int32_t)colors.size());
     return colors[point];
 }

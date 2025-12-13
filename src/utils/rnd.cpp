@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 Haohao123coding
 
-#include <cstdlib>
-#include <ctime>
+#include <chrono>
 #include <cstdint>
 
 #include "rnd.h"
 
+rnd::rnd() : gen(std::chrono::system_clock::now().time_since_epoch().count()){}
+
 int32_t rnd::setupRandomSeed(){
     try{
-        srand(time(nullptr));
+        auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+        gen.seed(seed);
     }catch(...){
         return 1;
     }
@@ -19,7 +21,7 @@ int32_t rnd::setupRandomSeed(){
 
 int32_t rnd::setupRandomSeed(uint32_t seed){
     try{
-        srand(seed);
+        gen.seed(seed);
     }catch(...){
         return 1;
     }
@@ -27,5 +29,13 @@ int32_t rnd::setupRandomSeed(uint32_t seed){
 }
 
 int32_t rnd::randInt(int32_t l, int32_t r){
-    return rand() % (r - l + 1) + l;
+    try{
+        if(l > r){
+            std::swap(l, r);
+        }
+        std::uniform_int_distribution<int32_t> dist(l, r - 1);
+        return dist(gen);
+    }catch(...){
+        return l;
+    }
 }
