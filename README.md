@@ -4,6 +4,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/Haohao123coding/easy-bitmap-pixel-editor.svg)
 ![GitHub issues](https://img.shields.io/github/issues/Haohao123coding/easy-bitmap-pixel-editor.svg)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/Haohao123coding/easy-bitmap-pixel-editor.svg)
+[![CI](https://github.com/Haohao123coding/easy-bitmap-pixel-editor/actions/workflows/ci.yml/badge.svg)](https://github.com/Haohao123coding/easy-bitmap-pixel-editor/actions/workflows/ci.yml)
 
 # Easy Bitmap Pixel Editor
 
