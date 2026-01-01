@@ -41,8 +41,11 @@ int main(int argc, char* argv[]){
             }
         }
     }
+    if(!openFileName.empty()){
+        curFile.openBMP(openFileName, isScriptFileMode);
+    }
     while(true){
-        cmdOpr::loopTime(isScriptFileMode, openFileName);
+        cmdOpr::loopTime(isScriptFileMode);
     }
     return 0;
 }

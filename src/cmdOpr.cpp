@@ -193,11 +193,7 @@ void cmdOpr::outPutError(int32_t errCode){
     }
 }
 
-void cmdOpr::loopTime(bool isScriptFileMode, const std::string& openFileName){
-    if(!openFileName.empty()){
-        curFile.openBMP(openFileName, isScriptFileMode);
-    }
-    
+void cmdOpr::loopTime(bool isScriptFileMode){
     if(!isScriptFileMode){
         if(curFile.getCurFileName().empty()){
             std::cout << "(No File)";

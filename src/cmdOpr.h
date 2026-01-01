@@ -25,7 +25,7 @@ namespace cmdOpr{
     int32_t analyseEcho(uint32_t wordCount, const std::vector<std::string>& cmds);
     void outPutError(int32_t errCode);
     // looptime:
-    void loopTime(bool isScriptFileMode, const std::string& openFileName);
+    void loopTime(bool isScriptFileMode);
 }
 
 #endif //EASY_BITMAP_PIXEL_EDITOR_CMDOPR_H
