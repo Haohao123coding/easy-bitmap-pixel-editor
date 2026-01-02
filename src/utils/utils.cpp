@@ -1,6 +1,6 @@
 // *** EBPE ***
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2025 Haohao123coding
+// Copyright (c) 2025-2026 Haohao123coding
 
 #include <iostream>
 
